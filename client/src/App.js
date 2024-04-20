@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Home from "./components/Home";
 import SearchByPrice from "./components/SearchByPrice";
 import SearchByLocation from "./components/SearchByLocation";
+import SearchByDescription from "./components/SearchByDescription";
 import AdvancedSearch from "./components/AdvancedSearch";
 import CompareCars from "./components/CompareCars";
 import "bootstrap/dist/css/bootstrap.min.css"; // Importing Bootstrap CSS
@@ -44,6 +45,11 @@ function App() {
                 </Link>
               </li>
               <li className="nav-item">
+                <Link className="nav-link" to="/search-by-desc">
+                  Search By Description
+                </Link>
+              </li>
+              <li className="nav-item">
                 <Link className="nav-link" to="/advanced-search">
                   Advanced Search
                 </Link>
@@ -62,6 +68,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/search-by-price" element={<SearchByPrice />} />
           <Route path="/search-by-location" element={<SearchByLocation />} />
+          <Route path="/search-by-desc" element={<SearchByDescription />} />
           <Route path="/advanced-search" element={<AdvancedSearch />} />
           <Route path="/compare-cars" element={<CompareCars />} />
         </Routes>

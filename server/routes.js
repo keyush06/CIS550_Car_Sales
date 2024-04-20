@@ -176,7 +176,7 @@ const criteria_cars = async function (req, res) {
       } else {
         res.json(data);
       }
-    },
+    }
   );
 };
 
@@ -214,32 +214,42 @@ const averagePrice = async function (req, res) {
       } else {
         res.json(data);
       }
-    },
+    }
   );
 };
 // graph.js useful library?
 
 // Route 5: GET /cars_by_price_range
 const carsByPriceRange = async function (req, res) {
-  const { priceLow, priceHigh } = req.query;
+  const {
+    priceLow,
+    priceHigh,
+    sort,
+    sortDirection = "ASC",
+    page = 1,
+    limit = 10,
+  } = req.query;
+  const offset = (page - 1) * limit;
 
   const query = `
     WITH ListTable AS (
-      SELECT id, vin, price, region, state, image, description, \`condition\`
+      SELECT id, vin, price, region, state, image, description, condition
       FROM Listing),
     CarTable AS (
       SELECT vin, manufacturer, model
       FROM Cars)
     SELECT *
     FROM ListTable L JOIN CarTable C ON L.vin = C.vin
-    WHERE L.price BETWEEN ${priceLow} AND ${priceHigh};
+    WHERE L.price BETWEEN ${priceLow} AND ${priceHigh}
+    ORDER BY ${sort} ${sortDirection}
+    LIMIT ${limit} OFFSET ${offset};
   `;
 
   // Execute the query
-  connection.query(query, [priceLow, priceHigh], (err, data) => {
+  connection.query(query, (err, data) => {
     if (err) {
       console.log(err);
-      res.json([]);
+      res.status(500).json({ error: "Internal Server Error" });
     } else {
       res.json(data);
     }
@@ -277,7 +287,7 @@ const geo_cars = async function (req, res) {
       } else {
         res.json(data);
       }
-    },
+    }
   );
 };
 
@@ -321,11 +331,9 @@ const gasPricingAnalysis = async function (req, res) {
 
   // Validate required parameters
   if (!lowerPriceLimit || !upperPriceLimit) {
-    return res
-      .status(400)
-      .json({
-        error: "Both lowerPriceLimit and upperPriceLimit are required.",
-      });
+    return res.status(400).json({
+      error: "Both lowerPriceLimit and upperPriceLimit are required.",
+    });
   }
 
   const query = `
