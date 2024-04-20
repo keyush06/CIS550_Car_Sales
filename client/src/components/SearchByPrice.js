@@ -1,135 +1,125 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 function SearchByPrice() {
-  const [price, setPrice] = useState(100000);
   const [cars, setCars] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [price, setPrice] = useState(50000); // Default mid-point value
   const [sortConfig, setSortConfig] = useState({
-    key: null,
-    direction: "ascending",
+    key: "price",
+    direction: "ASC",
   });
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
 
-  const dummyData = Array.from({ length: 50 }, (_, index) => ({
-    model: `Model ${index + 1}`,
-    manufacturer: ["Honda", "Toyota", "Tesla", "Ford", "Chevrolet"][index % 5],
-    vin: Math.random().toString(36).substr(2, 9).toUpperCase(),
-    odometer: Math.floor(Math.random() * 100000),
-    price: Math.floor(Math.random() * 100000),
-  }));
-
-  const handleSearch = () => {
-    const filteredCars = dummyData.filter((car) => car.price <= price);
-    setCars(filteredCars);
-    setCurrentPage(1); // Reset to first page after search
-  };
-
-  const handleSort = (key) => {
-    let direction = "ascending";
-    if (sortConfig.key === key && sortConfig.direction === "ascending") {
-      direction = "descending";
+  const fetchCars = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/cars_by_price_range",
+        {
+          params: {
+            priceLow: 0,
+            priceHigh: price,
+            sort: sortConfig.key,
+            sortDirection: sortConfig.direction,
+            page: pagination.page,
+            limit: pagination.limit,
+          },
+        }
+      );
+      setCars(response.data);
+    } catch (error) {
+      setError("Failed to fetch data");
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
-    setSortConfig({ key, direction });
-    const sortedCars = sortArray(cars, key, direction);
-    setCars(sortedCars);
   };
 
-  const sortArray = (arr, key, order = "ascending") => {
-    return arr.sort((a, b) => {
-      if (a[key] < b[key]) {
-        return order === "ascending" ? -1 : 1;
-      }
-      if (a[key] > b[key]) {
-        return order === "ascending" ? 1 : -1;
-      }
-      return 0;
+  useEffect(() => {
+    fetchCars();
+  }, [price, sortConfig, pagination]);
+
+  const handleSortChange = (key) => {
+    setSortConfig({
+      key,
+      direction:
+        sortConfig.key === key && sortConfig.direction === "ASC"
+          ? "DESC"
+          : "ASC",
     });
   };
 
-  const lastItemIndex = currentPage * itemsPerPage;
-  const firstItemIndex = lastItemIndex - itemsPerPage;
-  const currentItems = cars.slice(firstItemIndex, lastItemIndex);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-  const totalPages = Math.ceil(cars.length / itemsPerPage);
-
-  const paginationNumbers = [];
-  for (let i = 1; i <= totalPages; i++) {
-    paginationNumbers.push(i);
-  }
-
   return (
-    <div>
-      <div class="container mt-3">
-        <h1>Search By Price</h1>
-        <div class="d-flex flex-row align-items-center justify-content-between">
-          <input
-            type="range"
-            min="0"
-            max="100000"
-            step="100"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="form-range w-25"
-          />
-          <p className="mb-0 px-2">Maximum Price: ${price}</p>
-          <div>
-            <label className="d-flex align-items-center">
-              Items per page:
-              <select
-                value={itemsPerPage}
-                onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                className="form-select ms-2"
-                style={{ width: "auto" }}
-              >
-                <option value="10">10</option>
-                <option value="20">20</option>
-              </select>
-            </label>
-          </div>
-          <button onClick={handleSearch} className="btn btn-primary me-2">
-            Search
-          </button>
+    <div className="container mt-3">
+      <h1>Search By Price</h1>
+      <div className="d-flex flex-row align-items-center justify-content-between mb-3">
+        <input
+          type="range"
+          min="0"
+          max="100000"
+          step="100"
+          value={price}
+          onChange={(e) => setPrice(parseInt(e.target.value, 10))}
+          className="form-range w-25"
+        />
+        <p className="mb-0 mx-2">Max Price: ${price}</p>
+        <div>
+          <label className="d-flex align-items-center mb-0">
+            Items per page:
+            <select
+              value={pagination.limit}
+              onChange={(e) =>
+                setPagination({
+                  ...pagination,
+                  limit: parseInt(e.target.value, 10),
+                })
+              }
+              className="form-select ml-2"
+              style={{ width: "auto" }}
+            >
+              <option value="10">10</option>
+              <option value="20">20</option>
+            </select>
+          </label>
         </div>
+        <button onClick={fetchCars} className="btn btn-primary mr-2">
+          Search
+        </button>
       </div>
-
       <table className="table">
         <thead>
           <tr>
-            <th onClick={() => handleSort("model")}>Model</th>
-            <th onClick={() => handleSort("manufacturer")}>Manufacturer</th>
-            <th onClick={() => handleSort("vin")}>VIN</th>
-            <th onClick={() => handleSort("odometer")}>Odometer</th>
-            <th onClick={() => handleSort("price")}>Price</th>
+            <th onClick={() => handleSortChange("model")}>Model</th>
+            <th onClick={() => handleSortChange("manufacturer")}>
+              Manufacturer
+            </th>
+            <th onClick={() => handleSortChange("vin")}>VIN</th>
+            <th onClick={() => handleSortChange("odometer")}>Odometer</th>
+            <th onClick={() => handleSortChange("price")}>Price</th>
           </tr>
         </thead>
         <tbody>
-          {currentItems.map((car, index) => (
-            <tr key={index}>
-              <td>{car.model}</td>
-              <td>{car.manufacturer}</td>
-              <td>{car.vin}</td>
-              <td>{car.odometer}</td>
-              <td>${car.price}</td>
+          {loading ? (
+            <tr>
+              <td colSpan="5">Loading...</td>
             </tr>
-          ))}
+          ) : (
+            cars.map((car, index) => (
+              <tr key={index}>
+                <td>{car.model}</td>
+                <td>{car.manufacturer}</td>
+                <td>{car.vin}</td>
+                <td>{car.odometer}</td>
+                <td>${car.price}</td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
-      <nav>
-        <ul className="pagination">
-          {paginationNumbers.map((number) => (
-            <li key={number} className="page-item">
-              <a
-                onClick={() => paginate(number)}
-                href="#!"
-                className="page-link"
-              >
-                {number}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {error && <p>{error}</p>}
     </div>
   );
 }

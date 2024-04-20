@@ -12,7 +12,7 @@ const connection = mysql.createConnection({
 });
 connection.connect((err) => err && console.log(err));
 
-// Route 1: GET /cars_by_region
+// Route 1: GET /cars_by_region, Search by Location
 const state_cars = async function (req, res) {
   const { state, region, pageSize, offset } = req.params;
   const query = `
@@ -41,7 +41,7 @@ const state_cars = async function (req, res) {
   });
 };
 
-// Route 2: GET /get_statistics
+// Route 2: GET /get_statistics, Home Page
 const get_statistics = async function (req, res) {
   // const { state, region, pageSize, offset } = req.params;
   const query = `
@@ -146,7 +146,7 @@ const get_statistics = async function (req, res) {
   });
 };
 
-// Route 3: GET/cars_by_criteria
+// Route 3: GET/cars_by_criteria, Advanced Search
 const criteria_cars = async function (req, res) {
   const { make, model, start_year, end_year, condition, pageSize, offset } =
     req.params;
@@ -219,7 +219,7 @@ const averagePrice = async function (req, res) {
 };
 // graph.js useful library?
 
-// Route 5: GET /cars_by_price_range
+// Route 5: GET /cars_by_price_range, Search by Price
 const carsByPriceRange = async function (req, res) {
   const {
     priceLow,
@@ -256,7 +256,7 @@ const carsByPriceRange = async function (req, res) {
   });
 };
 
-// Route 6: GET /cars_by_geolocation
+// Route 6: GET /cars_by_geolocation, Search by Geolocation, new page
 const geo_cars = async function (req, res) {
   const { lat, lon, latRange, lonRange, pageSize, offset } = req.params;
   const query = `
@@ -291,7 +291,7 @@ const geo_cars = async function (req, res) {
   );
 };
 
-// Route 7
+// Route 7, Search by Description
 const carsWithSafetyFeatures = async function (req, res) {
   const { pageSize, offset } = req.query;
   // Set default values for pagination if not provided
@@ -325,7 +325,7 @@ const carsWithSafetyFeatures = async function (req, res) {
   });
 };
 
-// Route 8
+// Route 8, Advanced Search
 const gasPricingAnalysis = async function (req, res) {
   const { lowerPriceLimit, upperPriceLimit } = req.query;
 
@@ -364,7 +364,7 @@ const gasPricingAnalysis = async function (req, res) {
   });
 };
 
-// Route 9: GET/similar_cars
+// Route 9: GET/similar_cars, Comparison Pag
 const similar_cars = async function (req, res) {
   const { pageSize, offset } = req.params;
   const query = `
