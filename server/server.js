@@ -1,39 +1,33 @@
 const express = require("express");
-const bodyParser = require("body-parser");
-const mysql = require("mysql");
+const cors = require("cors");
+const config = require("./config");
+const routes = require("./routes");
+
 const app = express();
-const port = process.env.PORT || 8080; // You can set the port here or default to 8080
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
-// Import routes
-const { carsByPriceRange } = require("./routes");
+// We use express to define our various API endpoints and
+// provide their handlers that we implemented in routes.js
+app.get("/cars_by_region", routes.state_cars);
+app.get("/get_statistics", routes.get_statistics);
+app.get("/cars_by_criteria", routes.criteria_cars);
+app.get("/average_price", routes.averagePrice);
+app.get("/cars_by_price_range", routes.carsByPriceRange);
+app.get("/cars_by_geolocation", routes.geo_cars);
+app.get("/cars_with_safety_features", routes.carsWithSafetyFeatures);
+app.get("/gas_pricing_analysis", routes.gasPricingAnalysis);
+app.get("/similar_cars", routes.similar_cars);
+app.get("/compare_cars", routes.compare_cars);
+app.get("/criteria_by_region_and_state", routes.criteria_by_region_and_state);
 
-// Setup middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// MySQL connection
-const config = require("./config.json");
-const connection = mysql.createConnection({
-  host: config.rds_host,
-  user: config.rds_user,
-  password: config.rds_password,
-  port: config.rds_port,
-  database: config.rds_db,
+app.listen(config.server_port, () => {
+  console.log(
+    `Server running at http://${config.server_host}:${config.server_port}/`
+  );
 });
 
-connection.connect((err) => {
-  if (err) {
-    return console.error("error connecting: " + err.stack);
-  }
-  console.log("connected as id " + connection.threadId);
-});
-
-// Use the connection in your route
-app.get("/cars_by_price", (req, res) => {
-  carsByPriceRange(req, res, connection); // Pass the connection to the function
-});
-
-// Start server
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+module.exports = app;

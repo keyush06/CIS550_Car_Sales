@@ -293,7 +293,7 @@ const geo_cars = async function (req, res) {
 
 // Route 7, Search by Description
 const carsWithSafetyFeatures = async function (req, res) {
-  const { pageSize, offset } = req.query;
+  const { description, pageSize, offset } = req.query;
   // Set default values for pagination if not provided
   pageSize = pageSize || 20;
   offset = offset || 0;
@@ -310,7 +310,7 @@ const carsWithSafetyFeatures = async function (req, res) {
     SELECT *
     FROM ListTable L
     JOIN CarTable C ON L.vin = C.vin
-    WHERE description LIKE '%safe%'
+    WHERE description LIKE CONCAT('%',${description},'%')
     LIMIT ${pageSize} OFFSET ${offset};
   `;
 
@@ -394,7 +394,7 @@ const similar_cars = async function (req, res) {
   });
 };
 
-// Route 10: GET/compare_cars
+// Route 10: GET/compare_cars, Home Page
 const compare_cars = async function (req, res) {
   const { pageSize, offset } = req.params;
   const query = `SELECT
@@ -425,7 +425,7 @@ LIMIT ${pageSize} OFFSET ${offset};
   });
 };
 
-//Route 11: GET /criteria_by_region_and_state
+//Route 11: GET /criteria_by_region_and_state, Car comparison page
 const criteria_by_region_and_state = async function (req, res) {
   const { car_vin } = req.params;
   const query = `
