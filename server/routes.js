@@ -12,7 +12,10 @@ const connection = mysql.createConnection({
 });
 connection.connect((err) => err && console.log(err));
 
-// Route 1: GET /cars_by_region, Search by Location
+// Route 1: GET /cars_by_region: Retrieves Cars based on region
+// Used in: Search by Location Page
+// Request Parameters: state: string, region: string, pageSize: int, offset: int
+// Response Parameters: Car Data based on conditions
 const state_cars = async function (req, res) {
   const { state, region, pageSize, offset } = req.params;
   const query = `
@@ -41,7 +44,10 @@ const state_cars = async function (req, res) {
   });
 };
 
-// Route 2: GET /get_statistics, Home Page
+// Route 2: GET /get_statistics: Gets the car database statistics
+// Used in: Home Page
+// Request Parameters: None
+// Response Parameters: Car Database Statistics.
 const get_statistics = async function (req, res) {
   // const { state, region, pageSize, offset } = req.params;
   const query = `
@@ -146,7 +152,10 @@ const get_statistics = async function (req, res) {
   });
 };
 
-// Route 3: GET/cars_by_criteria, Advanced Search
+// Route 3: GET/cars_by_criteria: Retrieves Cars based on the advanced search filters
+// Used in: Advanced Search Page
+// Request Parameters: make: string, model:string, start_year:int, end_year:int, condition:string, pageSize:int, offset:int
+// Response Parameters: Car Data based on given conditions
 const criteria_cars = async function (req, res) {
   const { make, model, start_year, end_year, condition, pageSize, offset } =
     req.params;
@@ -180,9 +189,12 @@ const criteria_cars = async function (req, res) {
   );
 };
 
-// Route 4
+// Route 4: GET /average_price: Retrieves Average car price based on year
+// Used in: Home Page
+// Request Parameters: manufacturer: string, model:string, start_year:int, end_year:int
+// Response Parameters: Average car price based on the given condition.
 const averagePrice = async function (req, res) {
-  const { startYear, endYear } = req.query;
+  const { startYear, endYear, model, manufacturer } = req.query;
 
   if (!startYear || !endYear) {
     res
@@ -217,9 +229,11 @@ const averagePrice = async function (req, res) {
     }
   );
 };
-// graph.js useful library?
 
 // Route 5: GET /cars_by_price_range, Search by Price
+// Used in: Search by Price
+// Request Parameters: priceLow: int, priceHigh: int, sort: string
+// Response Parameters: Fetching cars based on the range of prices provided by the user.
 const carsByPriceRange = async function (req, res) {
   const {
     priceLow,
@@ -259,6 +273,9 @@ const carsByPriceRange = async function (req, res) {
 };
 
 // Route 6: GET /cars_by_geolocation, Search by Geolocation, new page
+// Used in: Geolocation page
+// Request Parameters: lat: int, lon: int, latRange:int, lonRange:int, pageSize:int, offset:int
+// Response Parameters: Fetching cars based on the location of the availability of the cars
 const geo_cars = async function (req, res) {
   const { lat, lon, latRange, lonRange, pageSize, offset } = req.params;
   const query = `
@@ -293,7 +310,10 @@ const geo_cars = async function (req, res) {
   );
 };
 
-// Route 7, Search by Description
+// Route 7: GET/carsWithSafetyFeatures: retrieves cars that match the description given by the user
+// Used in: Search and Results Page
+// Request Parameters: description: string, pageSize:int, offset:int
+// Response Parameters: Cars fetched based on the desription input by the user
 const carsWithSafetyFeatures = async function (req, res) {
   const { description, pageSize, offset } = req.query;
   // Set default values for pagination if not provided
@@ -327,7 +347,10 @@ const carsWithSafetyFeatures = async function (req, res) {
   });
 };
 
-// Route 8, Advanced Search
+// Route 8: GET/gasPricingAnalysis: Retrieves cars with user-specified features within a given price range
+// Used in: Search and Results Page
+// Request Parameters: lowerPriceLimit: int, upperPriceLimit: int, pageSize: int, offset: int
+// Response Parameters: Cars with user-specified features within a given price range
 const gasPricingAnalysis = async function (req, res) {
   const { lowerPriceLimit, upperPriceLimit } = req.query;
 
@@ -366,7 +389,10 @@ const gasPricingAnalysis = async function (req, res) {
   });
 };
 
-// Route 9: GET/similar_cars, Comparison Pag
+// Route 9: GET/similar_cars: Retrieves cars with comparable prices
+// Used in: Comparison Page
+// Request Parameters: pageSize: int, offset: int
+// Response Parameters: Cars with price comparable to price specified by user
 const similar_cars = async function (req, res) {
   const { pageSize, offset } = req.params;
   const query = `
@@ -396,7 +422,12 @@ const similar_cars = async function (req, res) {
   });
 };
 
-// Route 10: GET/compare_cars, Home Page
+// Route 10: GET/compare_cars: Retrieves manufacturer, price, model, transmission of a car selected by the user
+// across different regions and states
+// Used in: Home Page
+// Request Parameters: pageSize: int, offset: int
+// Response Parameters: Cars with manufacturer, price, model, transmission of a car selected by the user
+// across different regions and states
 const compare_cars = async function (req, res) {
   const { pageSize, offset } = req.params;
   const query = `SELECT
@@ -427,7 +458,10 @@ LIMIT ${pageSize} OFFSET ${offset};
   });
 };
 
-//Route 11: GET /criteria_by_region_and_state, Car comparison page
+// Route 11: GET /criteria_by_region_and_state: Retrieves cars by state and price range
+// Used in: Car comparison page
+// Request Parameters: car_vin: string
+// Response Parameters: Cars in the same state and price range as the car the user has selected
 const criteria_by_region_and_state = async function (req, res) {
   const { car_vin } = req.params;
   const query = `
