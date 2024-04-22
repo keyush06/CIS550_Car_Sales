@@ -29,6 +29,7 @@ function SearchByPrice() {
           },
         }
       );
+      console.log(response);
       setCars(response.data);
     } catch (error) {
       setError("Failed to fetch data");

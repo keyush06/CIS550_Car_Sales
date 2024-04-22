@@ -230,10 +230,11 @@ const carsByPriceRange = async function (req, res) {
     limit = 10,
   } = req.query;
   const offset = (page - 1) * limit;
+  console.log("Insde");
 
   const query = `
     WITH ListTable AS (
-      SELECT id, vin, price, region, state, image, description, condition
+      SELECT id, vin, price, region, state, image, description, \`condition\`
       FROM Listing),
     CarTable AS (
       SELECT vin, manufacturer, model
@@ -251,6 +252,7 @@ const carsByPriceRange = async function (req, res) {
       console.log(err);
       res.status(500).json({ error: "Internal Server Error" });
     } else {
+      console.log("Done");
       res.json(data);
     }
   });
