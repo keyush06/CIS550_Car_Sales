@@ -201,7 +201,7 @@ const criteria_cars = async function (req, res) {
       } else {
         res.json(data);
       }
-    }
+    },
   );
 };
 
@@ -242,7 +242,7 @@ const averagePrice = async function (req, res) {
       } else {
         res.json(data);
       }
-    }
+    },
   );
 };
 
@@ -290,7 +290,15 @@ const carsByPriceRange = async function (req, res) {
 // Request Parameters: lat: int, lon: int, latRange:int, lonRange:int, pageSize:int, offset:int
 // Response Parameters: Fetching cars based on the location of the availability of the cars
 const geo_cars = async function (req, res) {
-  const { lat, lon, latRange, lonRange, pageSize, offset } = req.params;
+  const { lat, lon, latRange, lonRange, pageSize, offset } = req.query;
+
+  // Parse and calculate latitude and longitude boundaries
+  const latMin = parseFloat(lat) - parseFloat(latRange);
+  const latMax = parseFloat(lat) + parseFloat(latRange);
+  const lonMin = parseFloat(lon) - parseFloat(lonRange);
+  const lonMax = parseFloat(lon) + parseFloat(lonRange);
+
+  // Prepare SQL query using placeholders for parameters
   const query = `
     WITH ListTable AS (
       SELECT id, vin, price, region, state, image, description, \`condition\`, lat, \`long\`
@@ -303,24 +311,30 @@ const geo_cars = async function (req, res) {
     SELECT *
     FROM ListTable L
     JOIN CarTable C ON L.vin = C.vin
-    WHERE L.lat BETWEEN ${lat - latRange} AND ${lat + latRange}
-      AND L.long BETWEEN ${lon - lonRange} AND ${lon + lonRange}
-    LIMIT ${pageSize} OFFSET ${offset};
+    WHERE L.lat BETWEEN ? AND ?
+      AND L.long BETWEEN ? AND ?
+    LIMIT ? OFFSET ?;
   `;
 
-  // Execute the query
-  connection.query(
-    query,
-    [lat, lon, latRange, lonRange, pageSize, offset],
-    (err, data) => {
-      if (err) {
-        console.log(err);
-        res.json([]);
-      } else {
-        res.json(data);
-      }
+  // Parameter array for safe SQL execution
+  const params = [
+    latMin,
+    latMax,
+    lonMin,
+    lonMax,
+    parseInt(pageSize, 10),
+    parseInt(offset, 10),
+  ];
+
+  // Execute the query safely
+  connection.query(query, params, (err, data) => {
+    if (err) {
+      console.error("Error executing query:", err);
+      res.status(500).json({ error: "Failed to fetch data" });
+    } else {
+      res.json(data);
     }
-  );
+  });
 };
 
 // Route 7: GET/carsWithSafetyFeatures: retrieves cars that match the description given by the user

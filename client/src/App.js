@@ -6,6 +6,8 @@ import SearchByLocation from "./components/SearchByLocation";
 import SearchByDescription from "./components/SearchByDescription";
 import AdvancedSearch from "./components/AdvancedSearch";
 import CompareCars from "./components/CompareCars";
+import GeolocationPage from "./components/GeolocationPage";
+
 import "bootstrap/dist/css/bootstrap.min.css"; // Importing Bootstrap CSS
 
 function App() {
@@ -59,6 +61,11 @@ function App() {
                   Compare Cars
                 </Link>
               </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/geolocation">
+                  Geolocation
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
@@ -71,6 +78,7 @@ function App() {
           <Route path="/search-by-desc" element={<SearchByDescription />} />
           <Route path="/advanced-search" element={<AdvancedSearch />} />
           <Route path="/compare-cars" element={<CompareCars />} />
+          <Route path="/geolocation" element={<GeolocationPage />} />
         </Routes>
       </div>
     </Router>
