@@ -118,12 +118,10 @@ function SearchByPrice() {
       <table className="table">
         <thead>
           <tr>
-            <th onClick={() => handleSortChange("model")}>Model</th>
-            <th onClick={() => handleSortChange("manufacturer")}>
-              Manufacturer
-            </th>
-            <th onClick={() => handleSortChange("vin")}>VIN</th>
-            <th onClick={() => handleSortChange("odometer")}>Odometer</th>
+            <th>Model</th>
+            <th>Manufacturer</th>
+            <th>VIN</th>
+            <th>Condition</th>
             <th onClick={() => handleSortChange("price")}>
               Price{" "}
               {sortConfig.key === "price"
@@ -145,7 +143,7 @@ function SearchByPrice() {
                 <td>{car.model}</td>
                 <td>{car.manufacturer}</td>
                 <td>{car.vin}</td>
-                <td>{car.odometer}</td>
+                <td>{car.condition}</td>
                 <td>${car.price}</td>
               </tr>
             ))

@@ -157,27 +157,36 @@ const get_statistics = async function (req, res) {
 // Request Parameters: make: string, model:string, start_year:int, end_year:int, condition:string, pageSize:int, offset:int
 // Response Parameters: Car Data based on given conditions
 const criteria_cars = async function (req, res) {
-  const { make, model, start_year, end_year, condition, pageSize, offset } =
-    req.params;
+  const {
+    manufacturer = "",
+    model = "",
+    start_year = 1900, // Assuming 1900 as the earliest possible year
+    end_year = new Date().getFullYear(), // Default to current year
+    condition = "",
+    pageSize = 10, // Default number of items per page
+    offset = 0, // Default starting point for pagination
+  } = req.params;
+
+  console.log(req.params);
   const query = `
    WITH ListTable AS (
-        SELECT id, vin, price, region, state, image, description, \`condition\`
+        SELECT id, vin, price, region, state, image, description, \`condition\`, year
         FROM Listing),
     CarTable AS (
     SELECT vin, manufacturer, model
     FROM Cars)
     SELECT *
     FROM ListTable L JOIN CarTable C ON L.vin = C.vin
-    WHERE manufacturer = 'chevrolet'
-    AND model = 'silverado 1500'
-    AND \`condition\` = 'good'
-    ORDER BY model
+    WHERE manufacturer = '%${manufacturer}%'
+    AND model = '%${model}%'
+    AND \`condition\` = '%${condition}%'
+    AND year BETWEEN ${start_year} AND ${end_year}
     LIMIT ${pageSize} OFFSET ${offset};
  `;
   // Execute the query
   connection.query(
     query,
-    [make, model, start_year, end_year, condition, pageSize, offset],
+    [manufacturer, model, start_year, end_year, condition, pageSize, offset],
     (err, data) => {
       if (err) {
         console.log(err);
@@ -309,7 +318,7 @@ const geo_cars = async function (req, res) {
 };
 
 // Route 7: GET/carsWithSafetyFeatures: retrieves cars that match the description given by the user
-// Used in: Search and Results Page
+// Used in: Search by Description Page
 // Request Parameters: description: string, pageSize:int, offset:int
 // Response Parameters: Cars fetched based on the desription input by the user
 const carsWithSafetyFeatures = async function (req, res) {
