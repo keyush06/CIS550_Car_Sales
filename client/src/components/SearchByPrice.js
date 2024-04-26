@@ -5,7 +5,7 @@ function SearchByPrice() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [price, setPrice] = useState(50000); // Default mid-point value
+  const [priceRange, setPriceRange] = useState({ low: 0, high: 50000 }); // Default range
   const [sortConfig, setSortConfig] = useState({
     key: "price",
     direction: "ASC",
@@ -20,8 +20,8 @@ function SearchByPrice() {
         "http://localhost:8080/cars_by_price_range",
         {
           params: {
-            priceLow: 0,
-            priceHigh: price,
+            priceLow: priceRange.low,
+            priceHigh: priceRange.high,
             sort: sortConfig.key,
             sortDirection: sortConfig.direction,
             page: pagination.page,
@@ -29,7 +29,6 @@ function SearchByPrice() {
           },
         }
       );
-      console.log(response);
       setCars(response.data);
     } catch (error) {
       setError("Failed to fetch data");
@@ -41,7 +40,7 @@ function SearchByPrice() {
 
   useEffect(() => {
     fetchCars();
-  }, [price, sortConfig, pagination]);
+  }, [sortConfig, pagination]);
 
   const handleSortChange = (key) => {
     setSortConfig({
@@ -53,20 +52,46 @@ function SearchByPrice() {
     });
   };
 
+  const handlePageChange = (newPage) => {
+    setPagination({ ...pagination, page: newPage });
+  };
+
   return (
     <div className="container mt-3">
       <h1>Search By Price</h1>
       <div className="d-flex flex-row align-items-center justify-content-between mb-3">
-        <input
-          type="range"
-          min="0"
-          max="100000"
-          step="100"
-          value={price}
-          onChange={(e) => setPrice(parseInt(e.target.value, 10))}
-          className="form-range w-25"
-        />
-        <p className="mb-0 mx-2">Max Price: ${price}</p>
+        <div>
+          <label>
+            Min Price: $
+            <input
+              type="number"
+              value={priceRange.low}
+              onChange={(e) =>
+                setPriceRange({
+                  ...priceRange,
+                  low: parseInt(e.target.value, 10),
+                })
+              }
+              className="form-control"
+              style={{ width: "auto", display: "inline", marginRight: "10px" }}
+            />
+          </label>
+          <label>
+            Max Price: $
+            <input
+              type="number"
+              value={priceRange.high}
+              onChange={(e) =>
+                setPriceRange({
+                  ...priceRange,
+                  high: parseInt(e.target.value, 10),
+                })
+              }
+              className="form-control"
+              style={{ width: "auto", display: "inline" }}
+            />
+          </label>
+        </div>
         <div>
           <label className="d-flex align-items-center mb-0">
             Items per page:
@@ -99,7 +124,14 @@ function SearchByPrice() {
             </th>
             <th onClick={() => handleSortChange("vin")}>VIN</th>
             <th onClick={() => handleSortChange("odometer")}>Odometer</th>
-            <th onClick={() => handleSortChange("price")}>Price</th>
+            <th onClick={() => handleSortChange("price")}>
+              Price{" "}
+              {sortConfig.key === "price"
+                ? sortConfig.direction === "DESC"
+                  ? "↓"
+                  : "↑"
+                : ""}
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -121,6 +153,21 @@ function SearchByPrice() {
         </tbody>
       </table>
       {error && <p>{error}</p>}
+      <div className="pagination d-flex justify-content-around">
+        <button
+          onClick={() => handlePageChange(Math.max(pagination.page - 1, 1))}
+          className="btn btn-secondary mr-2"
+        >
+          Previous
+        </button>
+        <span className="align-self-center">Page {pagination.page}</span>
+        <button
+          onClick={() => handlePageChange(pagination.page + 1)}
+          className="btn btn-secondary ml-2"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }
