@@ -315,7 +315,7 @@ const geo_cars = async function (req, res) {
 // Request Parameters: description: string, pageSize:int, offset:int
 // Response Parameters: Cars fetched based on the desription input by the user
 const carsWithSafetyFeatures = async function (req, res) {
-  const { description, pageSize, offset } = req.query;
+  var { description, pageSize, offset } = req.query;
   // Set default values for pagination if not provided
   pageSize = pageSize || 20;
   offset = offset || 0;
@@ -332,7 +332,7 @@ const carsWithSafetyFeatures = async function (req, res) {
     SELECT *
     FROM ListTable L
     JOIN CarTable C ON L.vin = C.vin
-    WHERE description LIKE CONCAT('%',${description},'%')
+    WHERE description LIKE '%${description}%'
     LIMIT ${pageSize} OFFSET ${offset};
   `;
 
