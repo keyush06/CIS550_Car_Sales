@@ -5,8 +5,8 @@ function AdvancedSearch() {
   const [inputs, setInputs] = useState({
     manufacturer: "",
     model: "",
-    start_year: "",
-    end_year: "",
+    start_year: 2000,
+    end_year: 2023,
     condition: "",
   });
   const [cars, setCars] = useState([]);
@@ -57,53 +57,52 @@ function AdvancedSearch() {
   return (
     <div className="container mt-3">
       <h1>Advanced Search</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="form-row">
-          <input
-            type="text"
-            name="manufacturer"
-            value={inputs.manufacturer}
-            onChange={handleInputChange}
-            placeholder="Manufacturer"
-            className="form-control m-2"
-          />
-          <input
-            type="text"
-            name="model"
-            value={inputs.model}
-            onChange={handleInputChange}
-            placeholder="Model"
-            className="form-control m-2"
-          />
-          <input
-            type="number"
-            name="start_year"
-            value={inputs.start_year}
-            onChange={handleInputChange}
-            placeholder="Start Year"
-            className="form-control m-2"
-          />
-          <input
-            type="number"
-            name="end_year"
-            value={inputs.end_year}
-            onChange={handleInputChange}
-            placeholder="End Year"
-            className="form-control m-2"
-          />
-          <input
-            type="text"
-            name="condition"
-            value={inputs.condition}
-            onChange={handleInputChange}
-            placeholder="Condition"
-            className="form-control m-2"
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="d-flex align-items-center">
+        <input
+          type="text"
+          name="manufacturer"
+          value={inputs.manufacturer}
+          onChange={handleInputChange}
+          placeholder="Manufacturer"
+          className="form-control m-2"
+        />
+        <input
+          type="text"
+          name="model"
+          value={inputs.model}
+          onChange={handleInputChange}
+          placeholder="Model"
+          className="form-control m-2"
+        />
+        <input
+          type="number"
+          name="start_year"
+          value={inputs.start_year}
+          onChange={handleInputChange}
+          placeholder="Start Year"
+          className="form-control m-2"
+        />
+        <input
+          type="number"
+          name="end_year"
+          value={inputs.end_year}
+          onChange={handleInputChange}
+          placeholder="End Year"
+          className="form-control m-2"
+        />
+        <input
+          type="text"
+          name="condition"
+          value={inputs.condition}
+          onChange={handleInputChange}
+          placeholder="Condition"
+          className="form-control m-2"
+        />
         <button type="submit" className="btn btn-primary m-2">
           Search
         </button>
       </form>
+
       {loading && <p>Loading...</p>}
       {error && <p>{error}</p>}
       {!loading && !error && (
@@ -114,7 +113,7 @@ function AdvancedSearch() {
               <th>Price</th>
               <th>Model</th>
               <th>Manufacturer</th>
-              <th>Image</th>
+
               <th>Condition</th>
               <th>Year</th>
             </tr>
@@ -126,13 +125,7 @@ function AdvancedSearch() {
                 <td>${car.price}</td>
                 <td>{car.model}</td>
                 <td>{car.manufacturer}</td>
-                <td>
-                  <img
-                    src={car.image}
-                    alt={car.model}
-                    style={{ width: "100px" }}
-                  />
-                </td>
+
                 <td>{car.condition}</td>
                 <td>{car.year}</td>
               </tr>
@@ -140,7 +133,7 @@ function AdvancedSearch() {
           </tbody>
         </table>
       )}
-      <div className="pagination d-flex justify-content-center">
+      <div className="pagination d-flex justify-content-around">
         <button
           onClick={() =>
             setPagination({

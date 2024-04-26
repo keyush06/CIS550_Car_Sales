@@ -159,29 +159,34 @@ const get_statistics = async function (req, res) {
 // Request Parameters: make: string, model:string, start_year:int, end_year:int, condition:string, pageSize:int, offset:int
 // Response Parameters: Car Data based on given conditions
 const criteria_cars = async function (req, res) {
-  const {
-    manufacturer = "",
-    model = "",
-    start_year = 1900, // Assuming 1900 as the earliest possible year
-    end_year = new Date().getFullYear(), // Default to current year
-    condition = "",
-    pageSize = 10, // Default number of items per page
-    offset = 0, // Default starting point for pagination
-  } = req.params;
-
-  console.log(req.params);
+  var {
+    manufacturer,
+    model,
+    start_year,
+    end_year,
+    condition,
+    pageSize,
+    offset,
+  } = req.query;
+  manufacturer = manufacturer ?? "";
+  model = model ?? "";
+  start_year = start_year ?? 2000;
+  end_year = end_year ?? 2023;
+  condition = condition ?? "";
+  pageSize = pageSize ?? 10;
+  offset = offset ?? 0;
   const query = `
    WITH ListTable AS (
         SELECT id, vin, price, region, state, image, description, \`condition\`, year
         FROM Listing),
-    CarTable AS (
-    SELECT vin, manufacturer, model
-    FROM Cars)
+        CarTable AS (
+        SELECT vin, manufacturer, model
+        FROM Cars)
     SELECT *
     FROM ListTable L JOIN CarTable C ON L.vin = C.vin
-    WHERE manufacturer = '%${manufacturer}%'
-    AND model = '%${model}%'
-    AND \`condition\` = '%${condition}%'
+    WHERE manufacturer LIKE '%${manufacturer}%'
+    AND model LIKE '%${model}%'
+    AND \`condition\` LIKE '%${condition}'
     AND year BETWEEN ${start_year} AND ${end_year}
     LIMIT ${pageSize} OFFSET ${offset};
  `;
@@ -196,7 +201,7 @@ const criteria_cars = async function (req, res) {
       } else {
         res.json(data);
       }
-    },
+    }
   );
 };
 
@@ -237,7 +242,7 @@ const averagePrice = async function (req, res) {
       } else {
         res.json(data);
       }
-    },
+    }
   );
 };
 
@@ -255,7 +260,6 @@ const carsByPriceRange = async function (req, res) {
     limit = 10,
   } = req.query;
   const offset = (page - 1) * limit;
-
   const query = `
     WITH ListTable AS (
       SELECT id, vin, price, region, state, image, description, \`condition\`
@@ -315,7 +319,7 @@ const geo_cars = async function (req, res) {
       } else {
         res.json(data);
       }
-    },
+    }
   );
 };
 
