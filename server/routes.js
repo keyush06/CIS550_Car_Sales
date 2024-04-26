@@ -256,7 +256,7 @@ const carsByPriceRange = async function (req, res) {
     SELECT *
     FROM ListTable L JOIN CarTable C ON L.vin = C.vin
     WHERE L.price BETWEEN ${priceLow} AND ${priceHigh}
-    ORDER BY ${sort} ${sortDirection}
+    ORDER BY price ${sortDirection}
     LIMIT ${limit} OFFSET ${offset};
   `;
 
