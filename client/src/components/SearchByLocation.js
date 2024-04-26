@@ -3,22 +3,21 @@ import axios from "axios";
 
 function SearchByLocation() {
   const [state, setState] = useState("");
-  const [region, setRegion] = useState("");
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState(null); // Track expanded description index
   const [currentPage, setCurrentPage] = useState(1);
-  const [carsPerPage, setCarsPerPage] = useState(10);
-  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
+  const pageSize = 10;
 
   const fetchCars = async () => {
     setLoading(true);
+    const offset = (currentPage - 1) * pageSize; // Calculate the offset based on current page
     try {
       const response = await axios.get(`http://localhost:8080/cars_by_region`, {
         params: {
-          state: state,
-          region: region,
-          pageSize: carsPerPage,
-          offset: (currentPage - 1) * carsPerPage,
+          state: state || undefined,
+          pageSize: pageSize,
+          offset: offset,
         },
       });
       setCars(response.data);
@@ -31,86 +30,103 @@ function SearchByLocation() {
 
   useEffect(() => {
     fetchCars();
-  }, [state, region, currentPage, carsPerPage]);
+  }, [currentPage]);
 
   const handleSearch = () => {
-    setCurrentPage(1); // Reset to page 1 for new searches
+    setCurrentPage(1); // Reset to first page on new search
     fetchCars();
   };
 
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
+  const handlePrevious = () => {
+    setCurrentPage(currentPage - 1);
+  };
+
+  const handleNext = () => {
+    setCurrentPage(currentPage + 1);
+  };
+
+  const toggleDescription = (index) => {
+    setExpanded(expanded === index ? null : index);
   };
 
   return (
-    <div className="container mt-3">
-      <h1>Search By Location</h1>
-      <div className="search-container mb-3 d-flex">
-        <input
-          type="text"
-          value={state}
-          onChange={(e) => setState(e.target.value)}
-          className="form-control me-2" // 'me-2' adds a margin to the right
-          placeholder="Enter state..."
-        />
-        <input
-          type="text"
-          value={region}
-          onChange={(e) => setRegion(e.target.value)}
-          className="form-control me-2" // 'me-2' adds a margin to the right
-          placeholder="Enter region..."
-        />
-        <button onClick={handleSearch} className="btn btn-primary">
-          Search
-        </button>
+    <div
+      className="container mt-3 d-flex flex-column"
+      style={{ height: "100vh" }}
+    >
+      <div className="flex-grow-1">
+        <h1>Search By Location</h1>
+        <div className="search-container mb-3 d-flex">
+          <input
+            type="text"
+            value={state}
+            onChange={(e) => setState(e.target.value)}
+            className="form-control me-2"
+            placeholder="Enter state..."
+          />
+          <button onClick={handleSearch} className="btn btn-primary">
+            Search
+          </button>
+        </div>
+        <div className="table-responsive">
+          <table className="table mt-3">
+            <thead>
+              <tr>
+                <th>VIN</th>
+                <th>State</th>
+                <th>Description</th>
+                <th>Condition</th>
+                <th>Manufacturer</th>
+                <th>Model</th>
+                <th>Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cars.length > 0 ? (
+                cars.map((car, index) => (
+                  <tr key={index}>
+                    <td>{car.vin}</td>
+                    <td>{car.state}</td>
+                    <td>
+                      <div style={{ maxWidth: "300px" }}>
+                        {expanded === index
+                          ? car.description
+                          : `${car.description.substring(0, 100)}...`}
+                        <button
+                          onClick={() => toggleDescription(index)}
+                          className="btn btn-sm btn-link"
+                        >
+                          {expanded === index ? "Less" : "More"}
+                        </button>
+                      </div>
+                    </td>
+                    <td>{car.condition}</td>
+                    <td>{car.manufacturer}</td>
+                    <td>{car.model}</td>
+                    <td>${car.price}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7">No cars found.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-
-      <div className="table-responsive">
-        <table className="table mt-3">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>VIN</th>
-              <th>Price</th>
-              <th>State</th>
-              <th>Region</th>
-              <th>Description</th>
-              <th>Condition</th>
-              <th>Manufacturer</th>
-              <th>Model</th>
-              <th>
-                <select
-                  value={pagination.limit}
-                  onChange={(e) =>
-                    setPagination({
-                      ...pagination,
-                      limit: parseInt(e.target.value, 10),
-                    })
-                  }
-                  className="form-select"
-                  style={{ width: "auto" }}
-                >
-                  <option value="10">10</option>
-                  <option value="20">20</option>
-                  <option value="30">30</option>
-                </select>
-              </th>
-            </tr>
-          </thead>
-          <tbody>{/* ... (map function for cars) */}</tbody>
-        </table>
-      </div>
-      <div className="d-flex justify-content-center">
+      <div className="mt-3 d-flex justify-content-between">
         <button
-          onClick={() => handlePageChange(pagination.page - 1)}
-          disabled={pagination.page === 1}
-          className="btn btn-secondary me-3" // 'me-3' adds a margin to the right of the button
+          onClick={handlePrevious}
+          className="btn btn-secondary"
+          disabled={currentPage === 1}
         >
           Previous
         </button>
         <button
-          onClick={() => handlePageChange(pagination.page + 1)}
+          onClick={handleNext}
           className="btn btn-secondary"
+          disabled={cars.length < pageSize}
         >
           Next
         </button>

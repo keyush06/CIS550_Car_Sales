@@ -17,27 +17,29 @@ connection.connect((err) => err && console.log(err));
 // Request Parameters: state: string, region: string, pageSize: int, offset: int
 // Response Parameters: Car Data based on conditions
 const state_cars = async function (req, res) {
-  const { state, region, pageSize, offset } = req.params;
+  const { state } = req.query;
+  const pageSize = req.query.pageSize ? parseInt(req.query.pageSize, 10) : 10; // Default to 10 if not provided
+  const offset = req.query.offset ? parseInt(req.query.offset, 10) : 0; // Default to 0 if not provided
+
   const query = `
     WITH ListTable AS (
-    	  SELECT id, vin, price, region, state, image, description, \`condition\`
-        FROM Listing
+      SELECT id, vin, price, state, image, description, \`condition\`
+      FROM Listing
     ),
     CarTable AS (
-        SELECT vin, manufacturer, model
-        FROM Cars
+      SELECT vin, manufacturer, model
+      FROM Cars
     )
     SELECT *
     FROM ListTable L
     JOIN CarTable C ON L.vin = C.vin
-    WHERE L.state = '${state}' AND L.region = ‘${region}’
+    WHERE L.state = '${state}'
     LIMIT ${pageSize} OFFSET ${offset};
- `;
-  // Execute the query
-  connection.query(query, [state, region, pageSize, offset], (err, data) => {
+  `;
+  connection.query(query, (err, data) => {
     if (err) {
-      console.log(err);
-      res.json([]);
+      console.error(err);
+      res.status(500).json({ error: "Failed to execute query" });
     } else {
       res.json(data);
     }
@@ -185,7 +187,7 @@ const criteria_cars = async function (req, res) {
       } else {
         res.json(data);
       }
-    }
+    },
   );
 };
 
@@ -226,7 +228,7 @@ const averagePrice = async function (req, res) {
       } else {
         res.json(data);
       }
-    }
+    },
   );
 };
 
@@ -306,7 +308,7 @@ const geo_cars = async function (req, res) {
       } else {
         res.json(data);
       }
-    }
+    },
   );
 };
 
