@@ -244,7 +244,6 @@ const carsByPriceRange = async function (req, res) {
     limit = 10,
   } = req.query;
   const offset = (page - 1) * limit;
-  console.log("Insde");
 
   const query = `
     WITH ListTable AS (
@@ -266,7 +265,6 @@ const carsByPriceRange = async function (req, res) {
       console.log(err);
       res.status(500).json({ error: "Internal Server Error" });
     } else {
-      console.log("Done");
       res.json(data);
     }
   });
