@@ -7,6 +7,7 @@ function SearchByDescription() {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [carsPerPage] = useState(10);
+  const [showMore, setShowMore] = useState(new Array(carsPerPage).fill(false)); // Array to track expanded descriptions
 
   const fetchCars = async () => {
     setLoading(true);
@@ -22,6 +23,7 @@ function SearchByDescription() {
         }
       );
       setCars(response.data);
+      setShowMore(new Array(response.data.length).fill(false)); // Reset showMore state for new data
     } catch (error) {
       console.error("Error fetching data: ", error);
     } finally {
@@ -36,6 +38,42 @@ function SearchByDescription() {
   const handleSearch = () => {
     setCurrentPage(1); // Reset to page 1 for new search
     fetchCars();
+  };
+
+  const toggleDescription = (index) => {
+    const newShowMore = [...showMore];
+    newShowMore[index] = !newShowMore[index];
+    setShowMore(newShowMore);
+  };
+
+  const renderDescription = (description, index) => {
+    if (description.length > 100 && !showMore[index]) {
+      return (
+        <>
+          {description.substring(0, 100)}...
+          <button
+            onClick={() => toggleDescription(index)}
+            className="btn btn-link"
+          >
+            See more
+          </button>
+        </>
+      );
+    } else {
+      return (
+        <>
+          {description}
+          {description.length > 100 && (
+            <button
+              onClick={() => toggleDescription(index)}
+              className="btn btn-link"
+            >
+              See less
+            </button>
+          )}
+        </>
+      );
+    }
   };
 
   return (
@@ -70,26 +108,27 @@ function SearchByDescription() {
               <tr key={index}>
                 <td>{car.model}</td>
                 <td>${car.price}</td>
-                <td>{car.description}</td>
+                <td>{renderDescription(car.description, index)}</td>
                 <td>{car.manufacturer}</td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
-      <div className="pagination">
-        {Array.from(
-          { length: Math.ceil(cars.length / carsPerPage) },
-          (_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`page-item ${i + 1 === currentPage ? "active" : ""}`}
-            >
-              {i + 1}
-            </button>
-          )
-        )}
+      <div className="pagination d-flex justify-content-around">
+        <button
+          onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+          className="btn btn-secondary mr-2"
+        >
+          Previous
+        </button>
+        <span className="align-self-center">Page {currentPage}</span>
+        <button
+          onClick={() => setCurrentPage(currentPage + 1)}
+          className="btn btn-secondary ml-2"
+        >
+          Next
+        </button>
       </div>
     </div>
   );
