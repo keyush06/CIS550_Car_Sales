@@ -2,119 +2,194 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 function CompareCars() {
-  const [price, setPrice] = useState(100000);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [carVIN, setcarVIN] = useState("");
   const [cars, setCars] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
-  // const dummyData = Array.from({ length: 50 }, (_, index) => ({
-  //   model: `Model ${index + 1}`,
-  //   manufacturer: ["Honda", "Toyota", "Tesla", "Ford", "Chevrolet"][index % 5],
-  //   vin: Math.random().toString(36).substr(2, 9).toUpperCase(),
-  //   odometer: Math.floor(Math.random() * 100000),
-  //   price: Math.floor(Math.random() * 100000),
-  // }));
-
   const fetchCars = async () => {
-    setLoading(true);
-    setError(null);
     try {
       const response = await axios.get(
-        "http://localhost:8080/compare_cars",
+        "http://localhost:8080/criteria_by_region_and_state",
+        {
+          params: { car_vin: carVIN },
+        }
       );
-      console.log(response);
       setCars(response.data);
+      console.log(response);
     } catch (error) {
-      setError("Failed to fetch data");
       console.error(error);
     } finally {
-      setLoading(false);
+    }
+  };
+
+  const handleSearch = () => {
+    fetchCars();
+  };
+
+  return (
+    <div>
+      <div className="container mt-3">
+        <h1>Compare Cars</h1>
+        <div className="input-group mb-3">
+          <input
+            type="text"
+            placeholder="Enter car VIN"
+            value={carVIN}
+            onChange={(e) => setcarVIN(e.target.value)}
+            className="form-control"
+          />
+          <div className="input-group-append">
+            <button onClick={handleSearch} className="btn btn-primary">
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mt-3">
+        <table className="table table-striped">
+          <thead className="thead-dark">
+            <tr>
+              <th scope="col">Attribute</th>
+              <th scope="col">Car 1</th>
+              <th scope="col">Car 2</th>
+              <th scope="col">Car 3</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">VIN</th>
+              <td>{cars.length > 0 ? cars[0].vin : "N/A"}</td>
+              <td>{cars.length > 1 ? cars[1].vin : "N/A"}</td>
+              <td>{cars.length > 2 ? cars[2].vin : "N/A"}</td>
+            </tr>
+            <tr>
+              <th scope="row">Manufacturer</th>
+              <td>{cars.length > 0 ? cars[0].manufacturer : "N/A"}</td>
+              <td>{cars.length > 1 ? cars[1].manufacturer : "N/A"}</td>
+              <td>{cars.length > 2 ? cars[2].manufacturer : "N/A"}</td>
+            </tr>
+            <tr>
+              <th scope="row">Model</th>
+              <td>{cars.length > 0 ? cars[0].model : "N/A"}</td>
+              <td>{cars.length > 1 ? cars[1].model : "N/A"}</td>
+              <td>{cars.length > 2 ? cars[2].model : "N/A"}</td>
+            </tr>
+            <tr>
+              <th scope="row">Price</th>
+              <td>{cars.length > 0 ? cars[0].price : "N/A"}</td>
+              <td>{cars.length > 1 ? cars[1].price : "N/A"}</td>
+              <td>{cars.length > 2 ? cars[2].price : "N/A"}</td>
+            </tr>
+            <tr>
+              <th scope="row">State</th>
+              <td>{cars.length > 0 ? cars[0].state : "N/A"}</td>
+              <td>{cars.length > 1 ? cars[1].state : "N/A"}</td>
+              <td>{cars.length > 2 ? cars[2].state : "N/A"}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <SimilarCars />
+    </div>
+  );
+}
+
+function SimilarCars() {
+  const [minPrice, setMinPrice] = useState(0);
+  const [page, setPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [newCars, setnewCars] = useState([]);
+
+  const fetchCars = async () => {
+    let finalOffset = (page - 1) * itemsPerPage;
+    try {
+      const response = await axios.get("http://localhost:8080/similar_cars", {
+        params: {
+          minPrice: minPrice,
+          pageSize: itemsPerPage,
+          offset: finalOffset,
+        },
+      });
+      setnewCars(response.data);
+      console.log(newCars);
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    } finally {
     }
   };
 
   useEffect(() => {
     fetchCars();
-  }, [price]);
+  }, [page, itemsPerPage]);
 
-  const handleSearch = () => {
-    setCurrentPage(1); // Reset to page 1 for new search
-    fetchCars();
-  };
-  
   return (
-    <div>
-      <div class="container mt-3">
-        <h1>Compare Cars</h1>
-        <div class="d-flex flex-row align-items-center justify-content-between">
-          {/* <input
-            type="checkbox"
-            min="0"
-            max="100000"
-            step="100"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="form-range w-25"
-          /> */}
-          <form action="/search">
-            <input type="text" name="query" placeholder="Search..."></input>
-            {/* <input type="submit" value="Search"></input> */}
-          </form>
-          {/* <p className="mb-0 px-2">Maximum Price: ${price}</p> */}
-          <div>
-            {/* <label className="d-flex align-items-center">
-              Items per page:
-              <select
-                value={itemsPerPage}
-                onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                className="form-select ms-2"
-                style={{ width: "auto" }}
-              >
-                <option value="10">10</option>
-                <option value="20">20</option>
-              </select>
-            </label> */}
-          </div>
-          <button onClick={handleSearch} className="btn btn-primary me-2">
-            Search
-          </button>
-        </div>
+    <div className="container mt-5">
+      <h2>Similar Cars</h2>
+      <p>This is a test component added to the page.</p>
+      <label>
+        Min Price: $
+        <input
+          type="number"
+          value={minPrice}
+          onChange={(e) => setMinPrice(parseInt(e.target.value, 10))}
+          className="form-control"
+          style={{ width: "auto", display: "inline", marginRight: "10px" }}
+        />
+      </label>
+      <div className="input-group-append">
+        <button onClick={fetchCars} className="btn btn-primary">
+          Search
+        </button>
       </div>
 
-      <table className = "table" border="1">
-        <tr>
-            <th scope="col"> </th> 
-            <th scope="col">Car 1</th> 
-            <th scope="col">Car 2</th>
-        </tr>
-        <tr>
-            <th scope="row">Manufacturer</th>
-            <td>car 1</td>
-            <td>car 2</td>
-        </tr>
-        <tr>
-            <th scope="row">Model</th> 
-            <td>car 1</td>
-            <td>car 2</td>
-        </tr>
-      </table>`
-
-      {/* <nav>
-        <ul className="pagination">
-          {paginationNumbers.map((number) => (
-            <li key={number} className="page-item">
-              <a
-                onClick={() => paginate(number)}
-                href="#!"
-                className="page-link"
-              >
-                {number}
-              </a>
-            </li>
+      <table className="table mt-3">
+        <thead>
+          <tr>
+            <th>VIN 1</th>
+            <th>VIN 2</th>
+            <th>Manufacturer 1</th>
+            <th>Manufacturer 2</th>
+            <th>Model 1</th>
+            <th>Model 2</th>
+            <th>Year 1</th>
+            <th>Year 2</th>
+            <th>Price 1</th>
+            <th>Price 2</th>
+          </tr>
+        </thead>
+        <tbody>
+          {newCars.map((car, index) => (
+            <tr key={index}>
+              <td>{car.VIN1}</td>
+              <td>{car.VIN2}</td>
+              <td>{car.Man1}</td>
+              <td>{car.Man2}</td>
+              <td>{car.Model1}</td>
+              <td>{car.Model2}</td>
+              <td>{car.year1}</td>
+              <td>{car.year2}</td>
+              <td>${car.Price1}</td>
+              <td>${car.Price2}</td>
+            </tr>
           ))}
-        </ul>
-      </nav> */}
+        </tbody>
+      </table>
+
+      <div className="pagination d-flex justify-content-around">
+        <button
+          onClick={() => setPage(Math.max(page - 1, 1))}
+          className="btn btn-secondary mr-2"
+        >
+          Previous
+        </button>
+        <span className="align-self-center">Page {page}</span>
+        <button
+          onClick={() => setPage(page + 1)}
+          className="btn btn-secondary ml-2"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }
