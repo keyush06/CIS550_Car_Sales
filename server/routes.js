@@ -141,7 +141,7 @@ const criteria_cars = async function (req, res) {
 // Request Parameters: manufacturer: string, model:string, start_year:int, end_year:int
 // Response Parameters: Average car price based on the given condition.
 const averagePrice = async function (req, res) {
-  const { startYear, endYear, model, manufacturer } = req.query;
+  const { startYear, endYear } = req.query;
 
   if (!startYear || !endYear) {
     res
@@ -154,27 +154,20 @@ const averagePrice = async function (req, res) {
     WITH VehicleStats AS (
       SELECT AVG(price) AS avg_price
       FROM Listing
-      JOIN Cars ON Listing.vin = Cars.vin
-      WHERE manufacturer = ${manufacturer} AND
-            model = ${model} AND
-            year BETWEEN ${startYear} AND ${endYear}
+      WHERE year BETWEEN ${startYear} AND ${endYear}
     )
     SELECT avg_price FROM VehicleStats;
   `;
 
   // Execute the query
-  connection.query(
-    query,
-    [make, model, start_year, end_year, condition, pageSize, offset],
-    (err, data) => {
-      if (err) {
-        console.log(err);
-        res.json([]);
-      } else {
-        res.json(data);
-      }
+  connection.query(query, [startYear, endYear], (err, data) => {
+    if (err) {
+      console.log(err);
+      res.json([]);
+    } else {
+      res.json(data);
     }
-  );
+  });
 };
 
 // Route 5: GET /cars_by_price_range, Search by Price

@@ -1,134 +1,23 @@
-// // import React, { useState, useEffect } from "react";
-// // import axios from "axios";
-
-// // function Home() {
-// //   const [car, setCar] = useState({});
-
-// //   useEffect(() => {
-// //     axios.get("/api/car").then((response) => {
-// //       setCar(response.data);
-// //     });
-// //   }, []);
-
-// //   return (
-// //     <div>
-// //       <h1>Home</h1>
-// //       <p>Make: {car.make}</p>
-// //       <p>Model: {car.model}</p>
-// //       <p>Year: {car.year}</p>
-// //     </div>
-// //   );
-// // }
-
-// // export default Home;
-
-// /* I want to Showcases comprehensive statistics, such as the total number of 
-// available used cars and the average price, detailed nationally as well as 
-// broken down by city and state.*/
-
-// // Path: client/src/components/Statistics.js
-// import React, { useState, useEffect } from "react";
-// import axios from "axios";
-
-// function Statistics() {
-//   const [stats, setStats] = useState({});
-
-//   useEffect(() => {
-//     axios.get("/api/stats").then((response) => {
-//       setStats(response.data);
-//     });
-//   }, []);
-
-//   return (
-//     <div>
-//       <h1>Statistics</h1>
-//       <p>Total Cars: {stats.totalCars}</p>
-//       <p>Average Price: {stats.avgPrice}</p>
-//       <p>By City:</p>
-//       <ul>
-//         {Object.keys(stats.carsByCity || {}).map((city) => (
-//           <li key={city}>
-//             {city}: {stats.carsByCity[city]}
-//           </li>
-//         ))}
-//       </ul>
-//       <p>By State:</p>
-//       <ul>
-//         {Object.keys(stats.carsByState || {}).map((state) => (
-//           <li key={state}>
-//             {state}: {stats.carsByState[state]}
-//           </li>
-//         ))}
-//       </ul>
-//     </div>
-//   );
-// }
-
-// export default Statistics;
-
-// // Path: client/src/App.js
-// // import React from "react";
-// import { BrowserRouter as Router, Route, Switch, Link } from "react-router-dom";
-// import Home from "./components/Home";
-// // import Statistics from "./components/Statistics";
-
-// function App() {
-//   return (
-//     <Router>
-//       <nav className="navbar navbar-expand-lg navbar-light bg-light">
-//         <ul className="navbar-nav">
-//           <li className="nav-item">
-//             <Link to="/" className="nav-link">
-//               Home
-//             </Link>
-//           </li>
-//           <li className="nav-item">
-//             <Link to="/statistics" className="nav-link">
-//               Statistics
-//             </Link>
-//           </li>
-//         </ul>
-//       </nav>
-//       <Switch>
-//         <Route path="/statistics">
-//           <Statistics />
-//         </Route>
-//         <Route path="/">
-//           <Home />
-//         </Route>
-//       </Switch>
-//     </Router>
-//   );
-// }
-
-// export default App;
-
-
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 function Home() {
-  const [car, setCar] = useState({});
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  // Function to fetch the car details
-  const fetchCarDetails = async () => {
-    setLoading(true);
-    try {
-      const carResponse = await axios.get("/api/car");
-      setCar(carResponse.data);
-    } catch (error) {
-      console.error("Error fetching car details:", error);
-    }
-  };
+  const [formData, setFormData] = useState({
+    startYear: "",
+    endYear: "",
+  });
+  const [averagePriceData, setAveragePriceData] = useState(0);
 
   // Function to fetch statistics
   const fetchStats = async () => {
+    setLoading(true);
     try {
-      const statsResponse = await axios.get("http://localhost:8080/get_statistics");
+      const statsResponse = await axios.get(
+        "http://localhost:8080/get_statistics"
+      );
       setStats(statsResponse.data);
-      console.log(statsResponse.data);
     } catch (error) {
       console.error("Error fetching statistics:", error);
     } finally {
@@ -136,53 +25,94 @@ function Home() {
     }
   };
 
-  // useEffect to trigger data fetching on component mount
+  // Function to fetch average price data
+  const fetchAveragePrice = async () => {
+    if (formData.startYear && formData.endYear) {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/average_price`,
+          {
+            params: {
+              startYear: formData.startYear,
+              endYear: formData.endYear,
+            },
+          }
+        );
+        setAveragePriceData(response.data[0].avg_price);
+        console.log(response.data[0].avg_price);
+      } catch (error) {
+        console.error("Error fetching average price:", error);
+        setLoading(false);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      alert("All fields must be filled out to fetch average price data.");
+    }
+  };
+
+  // Handle input change
+  const handleChange = (event) => {
+    setFormData({ ...formData, [event.target.name]: event.target.value });
+  };
+
   useEffect(() => {
-    fetchCarDetails();
     fetchStats();
   }, []);
 
   return (
     <div className="container mt-3">
       <h1>Home</h1>
+      <div>
+        <input
+          type="number"
+          placeholder="Start Year"
+          name="startYear"
+          value={formData.startYear}
+          onChange={handleChange}
+        />
+        <input
+          type="number"
+          placeholder="End Year"
+          name="endYear"
+          value={formData.endYear}
+          onChange={handleChange}
+        />
+        <button onClick={fetchAveragePrice}>Get Average Price</button>
+      </div>
       {loading ? (
         <p>Loading...</p>
       ) : (
         <div>
-          <h2>Featured Car</h2>
-          <p>Make: {car.make}</p>
-          <p>Model: {car.model}</p>
-          <p>Year: {car.year}</p>
-
-          <h2>Car Statistics</h2>
-          <p>Total Cars: </p>
-          <p>Average Price: </p>
-          <button
-          onClick={() => fetchStats()}
-          className="btn btn-secondary mr-2"
-        >
-          Previous
-        </button>
-          {/* <div>
-            <h3>By City:</h3>
-            <ul>
-              {Object.keys(stats.carsByCity).map(city => (
-                <li key={city}>
-                  {city}: Cars: {stats.carsByCity[city].count}, Avg Price: ${stats.carsByCity[city].avgPrice.toFixed(2)}
-                </li>
+          {averagePriceData && (
+            <div>
+              <h2>Average Price Data</h2>
+              <p>
+                {averagePriceData
+                  ? `Average Price: $${averagePriceData}`
+                  : "No data found"}
+              </p>
+            </div>
+          )}
+          <table className="table mt-3">
+            <thead>
+              <tr>
+                <th>State</th>
+                <th>Mean Price</th>
+                <th>Mean Odometer</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.map((stateInfo, index) => (
+                <tr key={index}>
+                  <td>{stateInfo.state}</td>
+                  <td>{stateInfo.avg_price}</td>
+                  <td>{stateInfo.avg_odometer}</td>
+                </tr>
               ))}
-            </ul>
-          </div>
-          <div>
-            <h3>By State:</h3>
-            <ul>
-              {Object.keys(stats.carsByState).map(state => (
-                <li key={state}>
-                  {state}: Cars: {stats.carsByState[state].count}, Avg Price: ${stats.carsByState[state].avgPrice.toFixed(2)}
-                </li>
-              ))}
-            </ul>
-          </div> */}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
@@ -190,4 +120,3 @@ function Home() {
 }
 
 export default Home;
-
