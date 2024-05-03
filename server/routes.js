@@ -421,12 +421,12 @@ const gasPricingAnalysis = async function (req, res) {
 // Request Parameters: pageSize: int, offset: int
 // Response Parameters: Cars with price comparable to price specified by user
 const similar_cars = async function (req, res) {
-  const { pageSize, offset } = req.params;
+  const { pageSize, offset, minPrice } = req.query;
   const query = `
    WITH SimListings AS (
  SELECT L1.id AS ListingID1, L2.id AS ListingID2, L1.price AS Price1, L2.price AS Price2, L1.vin AS VIN1, L2.vin AS vin2, L1.year as year1
  FROM Listing L1 JOIN Listing L2 ON L1.Vin = L2.Vin AND L1.id <> L2.id
- WHERE ABS(L1.price - L2.price) < 1000
+ WHERE ABS(L1.price - L2.price) < 1000 AND L1.price > ${minPrice} AND  L2.price > ${minPrice}
     ),
    CarTable AS (
  SELECT vin, manufacturer, model
@@ -435,7 +435,6 @@ const similar_cars = async function (req, res) {
    FROM CarTable C1
    JOIN SimListings S ON S.VIN1 = C1.VIN
    JOIN CarTable C2 ON S.VIN2 = C2.VIN
-   ORDER BY ABS(S.price1 - S.price2), S.year1;
    LIMIT ${pageSize} OFFSET ${offset};
  `;
   // Execute the query
@@ -490,13 +489,14 @@ LIMIT ${pageSize} OFFSET ${offset};
 // Request Parameters: car_vin: string
 // Response Parameters: Cars in the same state and price range as the car the user has selected
 const criteria_by_region_and_state = async function (req, res) {
-  const { car_vin } = req.params;
+  const { car_vin } = req.query;
+  console.log("Car Vin" , car_vin);
   const query = `
 WITH SelectedCar AS (
    SELECT L.price, L.state
    FROM Listing L
    JOIN Cars C ON L.Vin = C.vin
-   WHERE C.vin = ${car_vin}
+   WHERE C.vin = '${car_vin}'
 ),
 SimilarCars AS (
    SELECT C.vin, C.manufacturer, C.model, L.price, L.state
@@ -504,8 +504,7 @@ SimilarCars AS (
    JOIN Listing L ON C.vin = L.Vin
    WHERE L.state = (SELECT state FROM SelectedCar LIMIT 1)
               AND ABS(L.price - (SELECT price FROM SelectedCar LIMIT 1)) <= 1000
-                  AND C.vin <> ${car_vin}
-   ORDER BY ABS(L.price - (SELECT price FROM SelectedCar LIMIT 1))
+                  AND C.vin <> '${car_vin}'
    LIMIT 3
 )
 SELECT * FROM SimilarCars;
@@ -517,6 +516,7 @@ SELECT * FROM SimilarCars;
       console.log(err);
       res.json([]);
     } else {
+      console.log(data);
       res.json(data);
     }
   });
