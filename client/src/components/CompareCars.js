@@ -3,97 +3,193 @@ import axios from "axios";
 
 function CompareCars() {
   const [carVIN, setcarVIN] = useState("");
-  const [price, setPrice] = useState(100000);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [cars, setCars] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
   const fetchCars = async () => {
-    setLoading(true);
-    setError(null);
     try {
       const response = await axios.get(
-        "http://localhost:8080/criteria_by_region_and_state", {
-          params: {
-            car_vin: carVIN, //"1FTEW1E52LKD14191",
-          },
-        });
+        "http://localhost:8080/criteria_by_region_and_state",
+        {
+          params: { car_vin: carVIN },
+        }
+      );
       setCars(response.data);
       console.log(response);
     } catch (error) {
-      setError("Failed to fetch data: " + error.message);
       console.error(error);
     } finally {
-      console.log();
-      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchCars();
-  }, [price, carVIN]);
-
   const handleSearch = () => {
-    // setCurrentPage(1); // Reset to page 1 for new search
     fetchCars();
   };
-  
+
   return (
     <div>
       <div className="container mt-3">
         <h1>Compare Cars</h1>
-        <div className="d-flex flex-row align-items-center justify-content-between">
-          {/* <input
-            type="range"
-            min="0"
-            max="100000"
-            step="100"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="form-range w-25"
-          />
-          <p className="mb-0 px-2">Maximum Price: ${price}</p> */}
+        <div className="input-group mb-3">
           <input
             type="text"
             placeholder="Enter car VIN"
             value={carVIN}
             onChange={(e) => setcarVIN(e.target.value)}
-            className="form-control me-2"
+            className="form-control"
           />
-          <button onClick={handleSearch} className="btn btn-primary me-2">
-            Search
-          </button>
+          <div className="input-group-append">
+            <button onClick={handleSearch} className="btn btn-primary">
+              Search
+            </button>
+          </div>
         </div>
       </div>
 
-      <table className="table" border="1">
+      <div className="container mt-3">
+        <table className="table table-striped">
+          <thead className="thead-dark">
+            <tr>
+              <th scope="col">Attribute</th>
+              <th scope="col">Car 1</th>
+              <th scope="col">Car 2</th>
+              <th scope="col">Car 3</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">VIN</th>
+              <td>{cars.length > 0 ? cars[0].vin : "N/A"}</td>
+              <td>{cars.length > 1 ? cars[1].vin : "N/A"}</td>
+              <td>{cars.length > 2 ? cars[2].vin : "N/A"}</td>
+            </tr>
+            <tr>
+              <th scope="row">Manufacturer</th>
+              <td>{cars.length > 0 ? cars[0].manufacturer : "N/A"}</td>
+              <td>{cars.length > 1 ? cars[1].manufacturer : "N/A"}</td>
+              <td>{cars.length > 2 ? cars[2].manufacturer : "N/A"}</td>
+            </tr>
+            <tr>
+              <th scope="row">Model</th>
+              <td>{cars.length > 0 ? cars[0].model : "N/A"}</td>
+              <td>{cars.length > 1 ? cars[1].model : "N/A"}</td>
+              <td>{cars.length > 2 ? cars[2].model : "N/A"}</td>
+            </tr>
+            <tr>
+              <th scope="row">Price</th>
+              <td>{cars.length > 0 ? cars[0].price : "N/A"}</td>
+              <td>{cars.length > 1 ? cars[1].price : "N/A"}</td>
+              <td>{cars.length > 2 ? cars[2].price : "N/A"}</td>
+            </tr>
+            <tr>
+              <th scope="row">State</th>
+              <td>{cars.length > 0 ? cars[0].state : "N/A"}</td>
+              <td>{cars.length > 1 ? cars[1].state : "N/A"}</td>
+              <td>{cars.length > 2 ? cars[2].state : "N/A"}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <SimilarCars />
+    </div>
+  );
+}
+
+function SimilarCars() {
+  const [minPrice, setMinPrice] = useState(0);
+  const [page, setPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [newCars, setnewCars] = useState([]);
+
+  const fetchCars = async () => {
+    let finalOffset = (page - 1) * itemsPerPage;
+    try {
+      const response = await axios.get("http://localhost:8080/similar_cars", {
+        params: {
+          minPrice: minPrice,
+          pageSize: itemsPerPage,
+          offset: finalOffset,
+        },
+      });
+      setnewCars(response.data);
+      console.log(newCars);
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    fetchCars();
+  }, [page, itemsPerPage]);
+
+  return (
+    <div className="container mt-5">
+      <h2>Similar Cars</h2>
+      <p>This is a test component added to the page.</p>
+      <label>
+        Min Price: $
+        <input
+          type="number"
+          value={minPrice}
+          onChange={(e) => setMinPrice(parseInt(e.target.value, 10))}
+          className="form-control"
+          style={{ width: "auto", display: "inline", marginRight: "10px" }}
+        />
+      </label>
+      <div className="input-group-append">
+        <button onClick={fetchCars} className="btn btn-primary">
+          Search
+        </button>
+      </div>
+
+      <table className="table mt-3">
         <thead>
           <tr>
-              <th scope="col"></th> 
-              <th scope="col">Car 1</th> 
-              <th scope="col">Car 2</th>
+            <th>VIN 1</th>
+            <th>VIN 2</th>
+            <th>Manufacturer 1</th>
+            <th>Manufacturer 2</th>
+            <th>Model 1</th>
+            <th>Model 2</th>
+            <th>Year 1</th>
+            <th>Year 2</th>
+            <th>Price 1</th>
+            <th>Price 2</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-              <th scope="row">Manufacturer</th>
-              <td>{cars.length > 0 ? cars[0].manufacturer : 'N/A'}</td>
-              <td>{cars.length > 1 ? cars[1].manufacturer : 'N/A'}</td>
-          </tr>
-          <tr>
-              <th scope="row">Model</th> 
-              <td>{cars.length > 0 ? cars[0].model : 'N/A'}</td>
-              <td>{cars.length > 1 ? cars[1].model : 'N/A'}</td>
-          </tr>
-          <tr>
-              <th scope="row">Transmission</th>
-              <td>{cars.length > 0 ? cars[0].transmission : 'N/A'}</td>
-              <td>{cars.length > 1 ? cars[1].transmission : 'N/A'}</td>
-          </tr>
+          {newCars.map((car, index) => (
+            <tr key={index}>
+              <td>{car.VIN1}</td>
+              <td>{car.VIN2}</td>
+              <td>{car.Man1}</td>
+              <td>{car.Man2}</td>
+              <td>{car.Model1}</td>
+              <td>{car.Model2}</td>
+              <td>{car.year1}</td>
+              <td>{car.year2}</td>
+              <td>${car.Price1}</td>
+              <td>${car.Price2}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
+
+      <div className="pagination d-flex justify-content-around">
+        <button
+          onClick={() => setPage(Math.max(page - 1, 1))}
+          className="btn btn-secondary mr-2"
+        >
+          Previous
+        </button>
+        <span className="align-self-center">Page {page}</span>
+        <button
+          onClick={() => setPage(page + 1)}
+          className="btn btn-secondary ml-2"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }

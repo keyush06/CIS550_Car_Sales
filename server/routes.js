@@ -201,7 +201,7 @@ const criteria_cars = async function (req, res) {
       } else {
         res.json(data);
       }
-    },
+    }
   );
 };
 
@@ -242,7 +242,7 @@ const averagePrice = async function (req, res) {
       } else {
         res.json(data);
       }
-    },
+    }
   );
 };
 
@@ -423,19 +423,20 @@ const gasPricingAnalysis = async function (req, res) {
 const similar_cars = async function (req, res) {
   const { pageSize, offset, minPrice } = req.query;
   const query = `
-   WITH SimListings AS (
- SELECT L1.id AS ListingID1, L2.id AS ListingID2, L1.price AS Price1, L2.price AS Price2, L1.vin AS VIN1, L2.vin AS vin2, L1.year as year1
- FROM Listing L1 JOIN Listing L2 ON L1.Vin = L2.Vin AND L1.id <> L2.id
- WHERE ABS(L1.price - L2.price) < 1000 AND L1.price > ${minPrice} AND  L2.price > ${minPrice}
-    ),
-   CarTable AS (
- SELECT vin, manufacturer, model
- FROM Cars)
-   SELECT C1.VIN, C2.VIN, C1.model, C2.model, S.Price1, S.Price2
-   FROM CarTable C1
-   JOIN SimListings S ON S.VIN1 = C1.VIN
-   JOIN CarTable C2 ON S.VIN2 = C2.VIN
-   LIMIT ${pageSize} OFFSET ${offset};
+  WITH SimListings AS (
+    SELECT L1.id AS ListingID1, L2.id AS ListingID2, L1.price AS Price1, L2.price AS Price2, L1.vin AS VIN1, L2.vin AS VIN2, L1.year as year1, L2.year AS year2
+    FROM Listing L1 CROSS JOIN Listing L2
+    WHERE ABS(L1.price - L2.price) < 1000 AND L1.price > ${minPrice} AND  L2.price > ${minPrice} AND L1.id <> L2.id
+       ),
+      CarTable AS (
+    SELECT vin, manufacturer, model
+    FROM Cars)
+    SELECT S.ListingID1, S.ListingID2, S.Price1, S.Price2, S.VIN1, S.VIN2, S.Year1, S.Year2, C1.manufacturer AS Man1, C2.manufacturer AS Man2, C1.model AS Model1, C2.model AS Model2
+      FROM CarTable C1
+      JOIN SimListings S ON S.VIN1 = C1.VIN
+      JOIN CarTable C2 ON S.VIN2 = C2.VIN
+      WHERE C1.VIN <> C2.VIN
+      LIMIT ${pageSize} OFFSET ${offset};
  `;
   // Execute the query
   connection.query(query, [pageSize, offset], (err, data) => {
@@ -490,7 +491,7 @@ LIMIT ${pageSize} OFFSET ${offset};
 // Response Parameters: Cars in the same state and price range as the car the user has selected
 const criteria_by_region_and_state = async function (req, res) {
   const { car_vin } = req.query;
-  console.log("Car Vin" , car_vin);
+  console.log("Car Vin", car_vin);
   const query = `
 WITH SelectedCar AS (
    SELECT L.price, L.state
