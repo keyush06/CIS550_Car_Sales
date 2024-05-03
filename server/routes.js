@@ -51,97 +51,28 @@ const state_cars = async function (req, res) {
 // Request Parameters: None
 // Response Parameters: Car Database Statistics.
 const get_statistics = async function (req, res) {
-  // const { state, region, pageSize, offset } = req.params;
   const query = `
-  (WITH  CarTable AS (
-    SELECT vin, manufacturer AS seller, transmission
-    FROM Cars),
+  WITH
     ListTable AS (
-    SELECT id, price, state, \`condition\`, odometer, color
-    FROM Listing
+        SELECT id, price, state, \`condition\`, odometer, color
+        FROM Listing
     ),
-    JoinedData AS (
-       SELECT L.state, L.price, L.odometer, C.transmission, L.condition, L.color, C.seller
-       FROM CarTable C JOIN ListTable L ON C.vin = L.id
+    PriceTable AS (
+        SELECT state, AVG(price) AS avg_price
+        FROM ListTable JD1
+        GROUP BY state
+    ),
+    OdometerTable AS (
+        SELECT state, AVG(odometer) AS avg_odometer
+        FROM ListTable JD1
+        GROUP BY state
     )
     SELECT
-       state,
-       AVG(price) AS avg_price,
-       AVG(odometer) AS avg_odometer,
-       (
-           SELECT transmission
-           FROM JoinedData JD2
-           WHERE JD2.state = JD1.state
-           GROUP BY transmission
-           ORDER BY COUNT(transmission) DESC
-           LIMIT 1
-       ) AS most_frequent_transmission,
-       (
-           SELECT \`condition\`
-           FROM JoinedData JD2
-           WHERE JD2.state = JD1.state
-           GROUP BY \`condition\`
-           ORDER BY COUNT(\`condition\`) DESC
-           LIMIT 1
-       ) AS most_frequent_condition,
-       (
-           SELECT color
-           FROM JoinedData JD2
-           WHERE JD2.state = JD1.state
-           GROUP BY color
-           ORDER BY COUNT(color) DESC
-           LIMIT 1
-       ) AS most_frequent_color,
-    (       SELECT seller
-           FROM JoinedData JD2
-           WHERE JD2.state = JD1.state
-           GROUP BY seller
-           ORDER BY COUNT(seller) DESC
-           LIMIT 1
-       ) AS most_frequent_seller
-    FROM JoinedData JD1
-    GROUP BY state)
-    UNION
-    (WITH VehicleTable AS (
-    SELECT vin, transmission, state, odometer, \`condition\`, sellingprice, color, seller
-    FROM Vehicle)
-    SELECT
-       state,
-       AVG(sellingprice) AS avg_price,
-       AVG(odometer) AS avg_odometer,
-       (
-           SELECT transmission
-           FROM Vehicle V2
-           WHERE V2.state = V1.state
-           GROUP BY transmission
-           ORDER BY COUNT(transmission) DESC
-           LIMIT 1
-       ) AS most_frequent_transmission,
-       (
-           SELECT \`condition\`
-          FROM VehicleTable V2
-           WHERE V2.state = V1.state
-           GROUP BY \`condition\`
-           ORDER BY COUNT(\`condition\`) DESC
-           LIMIT 1
-       ) AS most_frequent_condition,
-       (
-           SELECT color
-          FROM Vehicle V2
-           WHERE V2.state = V1.state
-           GROUP BY color
-           ORDER BY COUNT(color) DESC
-           LIMIT 1
-       ) AS most_frequent_color,
-    (       SELECT seller
-           FROM Vehicle V2
-           WHERE V2.state = V1.state
-           GROUP BY seller
-           ORDER BY COUNT(seller) DESC
-           LIMIT 1
-       ) AS most_frequent_seller
-    FROM Vehicle V1
-    GROUP BY state);
+       P.state AS state,
+       avg_price,
+       avg_odometer
+    FROM PriceTable P JOIN OdometerTable O ON P.state = O.state
+    ORDER BY avg_price;
  `;
   // Execute the query
   connection.query(query, (err, data) => {
