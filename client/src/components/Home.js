@@ -79,13 +79,13 @@ function Home() {
             onChange={handleStateSelection}
             style={{ height: "50px" }}
           >
-            {Array.from(
-              new Set(allStats.map((stateInfo) => stateInfo.state))
-            ).map((state) => (
-              <option key={state} value={state}>
-                {state}
-              </option>
-            ))}
+            {Array.from(new Set(allStats.map((stateInfo) => stateInfo.state)))
+              .sort()
+              .map((state) => (
+                <option key={state} value={state}>
+                  {state}
+                </option>
+              ))}
           </select>
         </div>
         <div className="col-md-3">
