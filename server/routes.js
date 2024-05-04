@@ -216,6 +216,7 @@ const carsByPriceRange = async function (req, res) {
 // Request Parameters: lat: int, lon: int, latRange:int, lonRange:int, pageSize:int, offset:int
 // Response Parameters: Fetching cars based on the location of the availability of the cars
 const geo_cars = async function (req, res) {
+  console.log(req.query);
   const { lat, lon, latRange, lonRange, pageSize, offset } = req.query;
 
   // Parse and calculate latitude and longitude boundaries
@@ -237,9 +238,9 @@ const geo_cars = async function (req, res) {
     SELECT *
     FROM ListTable L
     JOIN CarTable C ON L.vin = C.vin
-    WHERE L.lat BETWEEN ? AND ?
-      AND L.long BETWEEN ? AND ?
-    LIMIT ? OFFSET ?;
+    WHERE L.lat BETWEEN ${latMin} AND ${latMax}
+      AND L.long BETWEEN ${lonMin} AND ${lonMax}
+    LIMIT ${pageSize} OFFSET ${offset};
   `;
 
   // Parameter array for safe SQL execution
@@ -259,6 +260,7 @@ const geo_cars = async function (req, res) {
       res.status(500).json({ error: "Failed to fetch data" });
     } else {
       res.json(data);
+      console.log(data);
     }
   });
 };

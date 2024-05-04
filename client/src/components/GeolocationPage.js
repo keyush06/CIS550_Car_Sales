@@ -15,8 +15,8 @@ function SearchByGeolocation() {
     if (!latitude || !longitude || !range) return; // Prevent fetching if parameters are not set
 
     setLoading(true);
-    const latRange = range / 111; // Convert km to approximate degrees
-    const lonRange = range / 111;
+    const latRange = range; // Convert km to approximate degrees
+    const lonRange = range;
     const offset = (currentPage - 1) * pageSize; // Calculate offset based on current page
     const params = {
       lat: latitude,
@@ -30,9 +30,10 @@ function SearchByGeolocation() {
     try {
       const response = await axios.get(
         `http://localhost:8080/cars_by_geolocation`,
-        { params },
+        { params }
       );
       setCars(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error("Error fetching data: ", error);
     } finally {
