@@ -52,27 +52,29 @@ const state_cars = async function (req, res) {
 // Response Parameters: Car Database Statistics.
 const get_statistics = async function (req, res) {
   const query = `
-  WITH
-    ListTable AS (
-        SELECT id, price, state, \`condition\`, odometer, color
-        FROM Listing
-    ),
-    PriceTable AS (
-        SELECT state, AVG(price) AS avg_price
-        FROM ListTable JD1
-        GROUP BY state
-    ),
-    OdometerTable AS (
-        SELECT state, AVG(odometer) AS avg_odometer
-        FROM ListTable JD1
-        GROUP BY state
-    )
-    SELECT
-       P.state AS state,
-       avg_price,
-       avg_odometer
-    FROM PriceTable P JOIN OdometerTable O ON P.state = O.state
-    ORDER BY avg_price;
+    WITH
+  ListTable AS (
+      SELECT id, price, state, \`condition\`, odometer, color, year
+      FROM Listing
+  ),
+  PriceTable AS (
+      SELECT state, year, AVG(price) AS avg_price
+      FROM ListTable JD1
+      GROUP BY state,year
+  ),
+  OdometerTable AS (
+      SELECT state, year,AVG(odometer) AS avg_odometer
+      FROM ListTable JD1
+      GROUP BY state,year
+  )
+  SELECT
+    P.state AS state, P.year as year,
+    avg(avg_price) as avg_price,
+    avg(avg_odometer) as avg_odometer
+  FROM PriceTable P JOIN OdometerTable O ON P.state = O.state
+  AND P.year = O.year
+  GROUP BY P.state, P.year
+  ORDER BY avg_price DESC;
  `;
   // Execute the query
   connection.query(query, (err, data) => {
