@@ -125,7 +125,6 @@ function SimilarCars() {
   return (
     <div className="container mt-5">
       <h2>Similar Cars</h2>
-      <p>This is a test component added to the page.</p>
       <label>
         Min Price: $
         <input
