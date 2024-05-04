@@ -1,16 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 
 function SearchByPrice() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [priceRange, setPriceRange] = useState({ low: 0, high: 50000 }); // Default range
+  const [priceRange, setPriceRange] = useState({ low: 0, high: 50000 });
   const [sortConfig, setSortConfig] = useState({
     key: "price",
     direction: "ASC",
   });
   const [pagination, setPagination] = useState({ page: 1, limit: 10 });
+
+  const [gasPrices, setGasPrices] = useState([]);
+  const [gasLoading, setGasLoading] = useState(false);
+  const [gasError, setGasError] = useState(null);
+  const [gasPriceRange, setGasPriceRange] = useState({ low: 0, high: 10000 });
+  const [gasPagination, setGasPagination] = useState({ page: 1, limit: 10 });
 
   const fetchCars = async () => {
     setLoading(true);
@@ -38,9 +44,27 @@ function SearchByPrice() {
     }
   };
 
-  useEffect(() => {
-    fetchCars();
-  }, [sortConfig, pagination]);
+  const fetchGasPrices = async () => {
+    setGasLoading(true);
+    setGasError(null);
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/gas_pricing_analysis",
+        {
+          params: {
+            lowerPriceLimit: gasPriceRange.low,
+            upperPriceLimit: gasPriceRange.high,
+          },
+        }
+      );
+      setGasPrices(response.data);
+    } catch (error) {
+      setGasError("Failed to fetch gas prices");
+      console.error(error);
+    } finally {
+      setGasLoading(false);
+    }
+  };
 
   const handleSortChange = (key) => {
     setSortConfig({
@@ -54,6 +78,10 @@ function SearchByPrice() {
 
   const handlePageChange = (newPage) => {
     setPagination({ ...pagination, page: newPage });
+  };
+
+  const handleGasPageChange = (newPage) => {
+    setGasPagination({ ...gasPagination, page: newPage });
   };
 
   return (
@@ -91,29 +119,10 @@ function SearchByPrice() {
               style={{ width: "auto", display: "inline" }}
             />
           </label>
+          <button onClick={fetchCars} className="btn btn-primary ml-2">
+            Search
+          </button>
         </div>
-        <div>
-          <label className="d-flex align-items-center mb-0">
-            Items per page:
-            <select
-              value={pagination.limit}
-              onChange={(e) =>
-                setPagination({
-                  ...pagination,
-                  limit: parseInt(e.target.value, 10),
-                })
-              }
-              className="form-select ml-2"
-              style={{ width: "auto" }}
-            >
-              <option value="10">10</option>
-              <option value="20">20</option>
-            </select>
-          </label>
-        </div>
-        <button onClick={fetchCars} className="btn btn-primary mr-2">
-          Search
-        </button>
       </div>
       <table className="table">
         <thead>
@@ -155,12 +164,101 @@ function SearchByPrice() {
         <button
           onClick={() => handlePageChange(Math.max(pagination.page - 1, 1))}
           className="btn btn-secondary mr-2"
+          disabled={pagination.page === 1}
         >
           Previous
         </button>
         <span className="align-self-center">Page {pagination.page}</span>
         <button
           onClick={() => handlePageChange(pagination.page + 1)}
+          className="btn btn-secondary ml-2"
+        >
+          Next
+        </button>
+      </div>
+
+      {/* Gas Prices Analysis */}
+      <h2>Gas Prices Analysis</h2>
+      <div className="d-flex flex-row align-items-center justify-content-between mb-3">
+        <div>
+          <label>
+            Min Price: $
+            <input
+              type="number"
+              value={gasPriceRange.low}
+              onChange={(e) =>
+                setGasPriceRange({
+                  ...gasPriceRange,
+                  low: parseInt(e.target.value, 10),
+                })
+              }
+              className="form-control"
+              style={{ width: "auto", display: "inline", marginRight: "10px" }}
+            />
+          </label>
+          <label>
+            Max Price: $
+            <input
+              type="number"
+              value={gasPriceRange.high}
+              onChange={(e) =>
+                setGasPriceRange({
+                  ...gasPriceRange,
+                  high: parseInt(e.target.value, 10),
+                })
+              }
+              className="form-control"
+              style={{ width: "auto", display: "inline" }}
+            />
+          </label>
+          <button onClick={fetchGasPrices} className="btn btn-primary ml-2">
+            Search
+          </button>
+        </div>
+      </div>
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Manufacturer</th>
+            <th>Model</th>
+            <th>Avg Price</th>
+            <th>Num Listings</th>
+          </tr>
+        </thead>
+        <tbody>
+          {gasLoading ? (
+            <tr>
+              <td colSpan="4">Loading...</td>
+            </tr>
+          ) : (
+            gasPrices
+              .slice(
+                (gasPagination.page - 1) * gasPagination.limit,
+                gasPagination.page * gasPagination.limit
+              )
+              .map((car, index) => (
+                <tr key={index}>
+                  <td>{car.manufacturer}</td>
+                  <td>{car.model}</td>
+                  <td>{car.avg_price}</td>
+                  <td>{car.num_listings}</td>
+                </tr>
+              ))
+          )}
+        </tbody>
+      </table>
+      {gasError && <p>{gasError}</p>}
+      <div className="pagination d-flex justify-content-around">
+        <button
+          onClick={() => handleGasPageChange(Math.max(gasPagination.page - 1, 1))}
+          className="btn btn-secondary mr-2"
+          disabled={gasPagination.page === 1}
+        >
+          Previous
+        </button>
+        <span className="align-self-center">Page {gasPagination.page}</span>
+        <button
+          onClick={() => handleGasPageChange(gasPagination.page + 1)}
           className="btn btn-secondary ml-2"
         >
           Next
