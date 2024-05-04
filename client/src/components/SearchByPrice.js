@@ -176,7 +176,7 @@ function SearchByPrice() {
           Next
         </button>
       </div>
-
+      <hr></hr>
       {/* Gas Prices Analysis */}
       <h2>Gas Prices Analysis</h2>
       <div className="d-flex flex-row align-items-center justify-content-between mb-3">
@@ -250,7 +250,9 @@ function SearchByPrice() {
       {gasError && <p>{gasError}</p>}
       <div className="pagination d-flex justify-content-around">
         <button
-          onClick={() => handleGasPageChange(Math.max(gasPagination.page - 1, 1))}
+          onClick={() =>
+            handleGasPageChange(Math.max(gasPagination.page - 1, 1))
+          }
           className="btn btn-secondary mr-2"
           disabled={gasPagination.page === 1}
         >
