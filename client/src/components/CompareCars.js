@@ -27,7 +27,9 @@ function CompareCars() {
   return (
     <div>
       <div className="container mt-3">
-        <h1>Compare Cars</h1>
+        <h1>
+          <center>Compare Cars</center>
+        </h1>
         <div className="input-group mb-3">
           <input
             type="text"
@@ -136,7 +138,7 @@ function SimilarCars() {
         />
       </label>
       <div className="input-group-append">
-        <button onClick={fetchCars} className="btn btn-primary">
+        <button onClick={fetchCars} className="btn btn-dark">
           Search
         </button>
       </div>
@@ -177,15 +179,12 @@ function SimilarCars() {
       <div className="pagination d-flex justify-content-around">
         <button
           onClick={() => setPage(Math.max(page - 1, 1))}
-          className="btn btn-secondary mr-2"
+          className="btn btn-dark mr-2"
         >
           Previous
         </button>
         <span className="align-self-center">Page {page}</span>
-        <button
-          onClick={() => setPage(page + 1)}
-          className="btn btn-secondary ml-2"
-        >
+        <button onClick={() => setPage(page + 1)} className="btn btn-dark ml-2">
           Next
         </button>
       </div>

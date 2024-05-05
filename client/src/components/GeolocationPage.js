@@ -71,7 +71,9 @@ function SearchByGeolocation() {
 
   return (
     <div className="container mt-3">
-      <h1>Search Cars by Geolocation</h1>
+      <h1>
+        <center>Search Cars by Geolocation</center>
+      </h1>
       <div className="input-group mb-3">
         <input
           type="number"
@@ -94,7 +96,7 @@ function SearchByGeolocation() {
           value={range}
           onChange={(e) => setRange(parseFloat(e.target.value))}
         />
-        <button onClick={handleSearch} className="btn btn-primary">
+        <button onClick={handleSearch} className="btn btn-dark">
           Search
         </button>
       </div>
@@ -133,14 +135,14 @@ function SearchByGeolocation() {
       <div className="d-flex justify-content-between mt-3">
         <button
           onClick={handlePrevious}
-          className="btn btn-secondary"
+          className="btn btn-dark"
           disabled={currentPage === 1}
         >
           Previous
         </button>
         <button
           onClick={handleNext}
-          className="btn btn-secondary"
+          className="btn btn-dark"
           disabled={cars.length < pageSize}
         >
           Next

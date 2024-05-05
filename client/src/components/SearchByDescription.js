@@ -78,7 +78,9 @@ function SearchByDescription() {
 
   return (
     <div>
-      <h1>Search By Description</h1>
+      <h1>
+        <center>Search By Description</center>
+      </h1>
       <div className="d-flex">
         <input
           type="text"
@@ -87,7 +89,7 @@ function SearchByDescription() {
           className="form-control mr-2"
           placeholder="Enter description..."
         />
-        <button onClick={handleSearch} className="btn btn-primary">
+        <button onClick={handleSearch} className="btn btn-dark">
           Search
         </button>
       </div>
@@ -118,14 +120,14 @@ function SearchByDescription() {
       <div className="pagination d-flex justify-content-around">
         <button
           onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
-          className="btn btn-secondary mr-2"
+          className="btn btn-dark mr-2"
         >
           Previous
         </button>
         <span className="align-self-center">Page {currentPage}</span>
         <button
           onClick={() => setCurrentPage(currentPage + 1)}
-          className="btn btn-secondary ml-2"
+          className="btn btn-dark ml-2"
         >
           Next
         </button>

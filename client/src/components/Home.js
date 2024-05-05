@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import logo from "../images/logo.jpeg"; // Ensure path matches your project structure
 
 function Home() {
   const [allStats, setAllStats] = useState([]);
@@ -67,9 +68,16 @@ function Home() {
     fetchStats();
   }, []);
 
+  // Inline styles for customization
+  const logoStyle = {
+    height: "100px",
+    borderRadius: "50%", // Make the logo round
+    marginTop: "20px",
+  };
+
   return (
-    <div className="container mt-3">
-      <h1>Home Page</h1>
+    <div className="container mt-3" style={{ textAlign: "center" }}>
+      <h1>Wheel Wise</h1>
       <div className="row align-items-end">
         <div className="col-md-4">
           <select
@@ -111,7 +119,7 @@ function Home() {
         <div className="col-md-2">
           <button
             onClick={fetchAveragePrice}
-            className="btn btn-primary btn-block"
+            className="btn btn-dark btn-block"
           >
             Get Average Price
           </button>
@@ -134,8 +142,8 @@ function Home() {
               <tr key={index}>
                 <td>{stateInfo.state}</td>
                 <td>{stateInfo.year}</td>
-                <td>{stateInfo.avg_price}</td>
-                <td>{stateInfo.avg_odometer}</td>
+                <td>{parseFloat(stateInfo.avg_price).toFixed(2)}</td>
+                <td>{parseFloat(stateInfo.avg_odometer).toFixed(2)}</td>
               </tr>
             ))}
           </tbody>

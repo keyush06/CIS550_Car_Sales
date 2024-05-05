@@ -55,7 +55,9 @@ function SearchByLocation() {
       style={{ height: "100vh" }}
     >
       <div className="flex-grow-1">
-        <h1>Search By Location</h1>
+        <h1>
+          <center>Search By Location</center>
+        </h1>
         <div className="search-container mb-3 d-flex">
           <input
             type="text"
@@ -64,7 +66,7 @@ function SearchByLocation() {
             className="form-control me-2"
             placeholder="Enter state..."
           />
-          <button onClick={handleSearch} className="btn btn-primary">
+          <button onClick={handleSearch} className="btn btn-dark">
             Search
           </button>
         </div>
@@ -118,14 +120,14 @@ function SearchByLocation() {
       <div className="mt-3 d-flex justify-content-between">
         <button
           onClick={handlePrevious}
-          className="btn btn-secondary"
+          className="btn btn-dark"
           disabled={currentPage === 1}
         >
           Previous
         </button>
         <button
           onClick={handleNext}
-          className="btn btn-secondary"
+          className="btn btn-dark"
           disabled={cars.length < pageSize}
         >
           Next

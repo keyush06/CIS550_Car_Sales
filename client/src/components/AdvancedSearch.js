@@ -56,7 +56,9 @@ function AdvancedSearch() {
 
   return (
     <div className="container mt-3">
-      <h1>Advanced Search</h1>
+      <h1>
+        <center>Advanced Search</center>
+      </h1>
       <form onSubmit={handleSubmit} className="d-flex align-items-center">
         <input
           type="text"
@@ -98,7 +100,7 @@ function AdvancedSearch() {
           placeholder="Condition"
           className="form-control m-2"
         />
-        <button type="submit" className="btn btn-primary m-2">
+        <button type="submit" className="btn btn-dark m-2">
           Search
         </button>
       </form>
@@ -141,7 +143,7 @@ function AdvancedSearch() {
               page: Math.max(pagination.page - 1, 1),
             })
           }
-          className="btn btn-secondary mr-2"
+          className="btn btn-dark mr-2"
         >
           Previous
         </button>
@@ -150,7 +152,7 @@ function AdvancedSearch() {
           onClick={() =>
             setPagination({ ...pagination, page: pagination.page + 1 })
           }
-          className="btn btn-secondary ml-2"
+          className="btn btn-dark ml-2"
         >
           Next
         </button>

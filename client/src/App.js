@@ -7,16 +7,23 @@ import SearchByDescription from "./components/SearchByDescription";
 import AdvancedSearch from "./components/AdvancedSearch";
 import CompareCars from "./components/CompareCars";
 import GeolocationPage from "./components/GeolocationPage";
+import logo from "./images/logo.jpeg"; // Import the logo image
 
 import "bootstrap/dist/css/bootstrap.min.css"; // Importing Bootstrap CSS
 
 function App() {
+  // Inline style for the rounded logo in the navbar
+  const navbarLogoStyle = {
+    height: "50px",
+    borderRadius: "50%", // Makes the logo round
+  };
+
   return (
     <Router>
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
         <div className="container-fluid">
           <Link className="navbar-brand" to="/">
-            <b>WheelWise</b>
+            <img src={logo} alt="WheelWise Logo" style={navbarLogoStyle} />
           </Link>
           <button
             className="navbar-toggler"

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 function SearchByPrice() {
@@ -44,6 +44,10 @@ function SearchByPrice() {
     }
   };
 
+  // useEffect(() => {
+  //   fetchCars();
+  // }, [pagination]);
+
   const fetchGasPrices = async () => {
     setGasLoading(true);
     setGasError(null);
@@ -83,46 +87,49 @@ function SearchByPrice() {
   const handleGasPageChange = (newPage) => {
     setGasPagination({ ...gasPagination, page: newPage });
   };
+  useEffect(() => {
+    fetchCars();
+  }, [sortConfig, pagination]);
 
   return (
     <div className="container mt-3">
-      <h1>Search By Price</h1>
-      <div className="d-flex flex-row align-items-center justify-content-between mb-3">
-        <div>
-          <label>
-            Min Price: $
-            <input
-              type="number"
-              value={priceRange.low}
-              onChange={(e) =>
-                setPriceRange({
-                  ...priceRange,
-                  low: parseInt(e.target.value, 10),
-                })
-              }
-              className="form-control"
-              style={{ width: "auto", display: "inline", marginRight: "10px" }}
-            />
-          </label>
-          <label>
-            Max Price: $
-            <input
-              type="number"
-              value={priceRange.high}
-              onChange={(e) =>
-                setPriceRange({
-                  ...priceRange,
-                  high: parseInt(e.target.value, 10),
-                })
-              }
-              className="form-control"
-              style={{ width: "auto", display: "inline" }}
-            />
-          </label>
-          <button onClick={fetchCars} className="btn btn-primary ml-2">
-            Search
-          </button>
-        </div>
+      <h1>
+        <center>Search By Price</center>
+      </h1>
+      <div className="d-flex flex-row align-items-center justify-content-around">
+        <label>
+          Min Price: $
+          <input
+            type="number"
+            value={priceRange.low}
+            onChange={(e) =>
+              setPriceRange({
+                ...priceRange,
+                low: parseInt(e.target.value, 10),
+              })
+            }
+            className="form-control"
+            style={{ width: "auto", display: "inline", marginRight: "10px" }}
+          />
+        </label>
+        <label>
+          Max Price: $
+          <input
+            type="number"
+            value={priceRange.high}
+            onChange={(e) =>
+              setPriceRange({
+                ...priceRange,
+                high: parseInt(e.target.value, 10),
+              })
+            }
+            className="form-control"
+            style={{ width: "auto", display: "inline" }}
+          />
+        </label>
+        <button onClick={fetchCars} className="btn btn-dark ml-2">
+          Search
+        </button>
       </div>
       <table className="table">
         <thead>
@@ -163,7 +170,7 @@ function SearchByPrice() {
       <div className="pagination d-flex justify-content-around">
         <button
           onClick={() => handlePageChange(Math.max(pagination.page - 1, 1))}
-          className="btn btn-secondary mr-2"
+          className="btn btn-dark mr-2"
           disabled={pagination.page === 1}
         >
           Previous
@@ -171,50 +178,50 @@ function SearchByPrice() {
         <span className="align-self-center">Page {pagination.page}</span>
         <button
           onClick={() => handlePageChange(pagination.page + 1)}
-          className="btn btn-secondary ml-2"
+          className="btn btn-dark ml-2"
         >
           Next
         </button>
       </div>
       <hr></hr>
       {/* Gas Prices Analysis */}
-      <h2>Gas Prices Analysis</h2>
-      <div className="d-flex flex-row align-items-center justify-content-between mb-3">
-        <div>
-          <label>
-            Min Price: $
-            <input
-              type="number"
-              value={gasPriceRange.low}
-              onChange={(e) =>
-                setGasPriceRange({
-                  ...gasPriceRange,
-                  low: parseInt(e.target.value, 10),
-                })
-              }
-              className="form-control"
-              style={{ width: "auto", display: "inline", marginRight: "10px" }}
-            />
-          </label>
-          <label>
-            Max Price: $
-            <input
-              type="number"
-              value={gasPriceRange.high}
-              onChange={(e) =>
-                setGasPriceRange({
-                  ...gasPriceRange,
-                  high: parseInt(e.target.value, 10),
-                })
-              }
-              className="form-control"
-              style={{ width: "auto", display: "inline" }}
-            />
-          </label>
-          <button onClick={fetchGasPrices} className="btn btn-primary ml-2">
-            Search
-          </button>
-        </div>
+      <h1>
+        <center>Gas Prices Analysis</center>
+      </h1>
+      <div className="d-flex flex-row align-items-center justify-content-around">
+        <label>
+          Min Price: $
+          <input
+            type="number"
+            value={gasPriceRange.low}
+            onChange={(e) =>
+              setGasPriceRange({
+                ...gasPriceRange,
+                low: parseInt(e.target.value, 10),
+              })
+            }
+            className="form-control"
+            style={{ width: "auto", display: "inline", marginRight: "10px" }}
+          />
+        </label>
+        <label>
+          Max Price: $
+          <input
+            type="number"
+            value={gasPriceRange.high}
+            onChange={(e) =>
+              setGasPriceRange({
+                ...gasPriceRange,
+                high: parseInt(e.target.value, 10),
+              })
+            }
+            className="form-control"
+            style={{ width: "auto", display: "inline" }}
+          />
+        </label>
+        <button onClick={fetchGasPrices} className="btn btn-dark ml-2">
+          Search
+        </button>
       </div>
       <table className="table">
         <thead>
@@ -253,7 +260,7 @@ function SearchByPrice() {
           onClick={() =>
             handleGasPageChange(Math.max(gasPagination.page - 1, 1))
           }
-          className="btn btn-secondary mr-2"
+          className="btn btn-dark mr-2"
           disabled={gasPagination.page === 1}
         >
           Previous
@@ -261,7 +268,7 @@ function SearchByPrice() {
         <span className="align-self-center">Page {gasPagination.page}</span>
         <button
           onClick={() => handleGasPageChange(gasPagination.page + 1)}
-          className="btn btn-secondary ml-2"
+          className="btn btn-dark ml-2"
         >
           Next
         </button>
