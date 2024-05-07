@@ -21,7 +21,7 @@ app.get("/cars_by_geolocation", routes.geo_cars);
 app.get("/cars_with_safety_features", routes.carsWithSafetyFeatures);
 app.get("/gas_pricing_analysis", routes.gasPricingAnalysis);
 app.get("/similar_cars", routes.similar_cars);
-app.get("/compare_cars", routes.compare_cars);
+// app.get("/compare_cars", routes.compare_cars);
 app.get("/criteria_by_region_and_state", routes.criteria_by_region_and_state);
 
 app.listen(config.server_port, () => {
